@@ -960,7 +960,7 @@ function createLoadingIndicator() {
   const loading = gui.GifPlayer.create();
   container.addChildView(loading);
   loading.setStyle({ width: 40, height: 40 });
-  loading.setImage(gui.Image.createFromPath(path.join(__dirname, 'assets', 'loading@2x.gif')));
+  // loading.setImage(gui.Image.createFromPath(path.join(__dirname, 'assets', 'loading.gif')));
   loading.setAnimating(true);
   container.setStyle({ flex: 1, alignItems: 'center', justifyContent: 'center', minWidth: 50, minHeight: 50 });
   return container;
@@ -973,21 +973,6 @@ class PafeDelegate {
   }
 
   onReadyLaunchGUI() {
-
-    /**
-    * @TODO: Test server connection
-    **/
-    // const pagesPath = {main: '/', add: '/add', view: '/entries', entry: '/entries/:id'}; // @TODO: Pafe server
-    // page = webContents.create({ nodeIntegration: true });
-    // setTimeout(() => { page.loadURL(`https://pafe:8800${pagesPath.main}`) }, 6000);
-    // // Replace loading indicator with webContents after page is loaded.
-    // page.on('did-finish-load', () => {
-    //     const native = gui.ChromeView.create(page.getNativeView());
-    //     native.setStyle({ flex: 1 });
-    //     view.removeChildView(loadingView);
-    //     view.addChildView(native);
-    // });
-
     this.initDatastore();
     this.createMainWindow();
   }
