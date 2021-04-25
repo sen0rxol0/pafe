@@ -11,7 +11,6 @@
 */
 
 const path = require('path');
-// const fs = require('path');
 const gui = require('../gui');
 const {
   app,
@@ -205,7 +204,7 @@ function createWelcomeHeading() {
 *    A credential record is keeped and shared as:
 *      CompanyName:
 *        Records:
-*          - hostname1,login1,password1,note!
+*          - hostname1,login1,password1,note1
 *          - hostname2,login2,password2,note2
 *
 *   Keeping track of logins, passwords, addresses, documents, etc, is still hard so
@@ -698,16 +697,9 @@ class SidebarItemView {
 
   onMouseUp(view, ev) {
     if (!this.hover) return;
-    this.selected = true;
+    // this.selected = true;
     // this.view.schedulePaint();
     dispatchSidebarAction(this.dispatch);
-     // if (ev.button === 1) {
-     //   // if (selectedItem && selectedItem.dispatch !== self.dispatch) {
-     //   //   selectedItem.selected = false;
-     //   //   selectedItem.schedulePaint();
-     //   // }
-     //   // selectedItem = self;
-     // }
    };
 }
 
@@ -717,17 +709,12 @@ class SidebarItemView {
 class Sidebar {
   constructor() {
     this.view = gui.Container.create();
-    // let selectedItem = null;
-    // const iconSize = 20;
     for (const item of this.getItems()) {
       const sidebarItem = new SidebarItemView(item.title, item.dispatch);
       // const itemIcon = gui.Image.createFromPath(path.join(__dirname, 'assets', item.icon));
       this.view.addChildView(sidebarItem.view);
       sidebarItems.push(sidebarItem);
     };
-    // Select first item by default.
-    // selectedItem = this.view.childAt(0);
-    // selectedItem.selected = true;
     this.view.setStyle({ flexDirection: 'column', width: SIDEBAR_WIDTH });
     this.view.setBackgroundColor(COLORS.background);
   }
