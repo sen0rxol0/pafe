@@ -1,8 +1,5 @@
 const { exec, spawn } = require('child_process');
 const { task, src, dest, watch, parallel, series } = require('gulp');
-//const babel = require('gulp-babel');
-//const concat = require('gulp-concat');
-//const sourcemaps = require('gulp-sourcemaps');
 
 var electron = null;
 
@@ -40,17 +37,17 @@ task('start', series('build', resolve => {
 }));
 
 task('package', series('build', () => {
-  return exec(`${__dirname}/node_modules/.bin/electron-packager ./ --overwrite --platform=darwin --arch=all --out=build`)
+  return exec(`${__dirname}/node_modules/.bin/electron-packager ./ --platform=darwin --arch=all --out=build --overwrite`)
     .on('close', () => process.exit());
 }));
 
 task('package:win', series('build', () => {
-  return exec(`${__dirname}/node_modules/.bin/electron-packager ./ --overwrite --platform=win32 --arch=ia32 --win32metadata.CompanyName="BAIEFLOW" --asar --out=build`)
+  return exec(`${__dirname}/node_modules/.bin/electron-packager ./ --platform=win32 --arch=ia32 --win32metadata.CompanyName="BAIEFLOW" --asar --out=build --overwrite`)
     .on('close', () => process.exit());
 }));
 
 task('package:linux', series('build', () => {
-  return exec(`${__dirname}/node_modules/.bin/electron-packager ./ --overwrite --platform=linux --arch=x64 --asar --out=build`)
+  return exec(`${__dirname}/node_modules/.bin/electron-packager ./ --platform=linux --arch=x64 --asar --out=build --overwrite`)
     .on('close', () => process.exit());
 }));
 
