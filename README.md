@@ -2,7 +2,8 @@
 This app is targeted for anything that needs password encryption.
 
 MOTO: One password to rule them all.
-State: early BETA 
+
+State: early BETA
 
 ## About encryption
 PAFE encrypts using AES-256-GCM algorithm with a master key,
@@ -16,6 +17,6 @@ The development files are under the `src` directory, `main.js` is the project en
 Thanks to [ElectronJS](https://github.com/electron/electron) and [Yue](https://github.com/yue/yue)
 
 ## About license
-- [MIT]()
+- [MIT](https://github.com/sen0rxol0/pafe/blob/main/LICENCE)
 - Electron is licenced under [MIT](https://github.com/electron/electron/blob/master/LICENSE)
 - Yue is licenced under [LGPL v2.1](https://github.com/yue/yue/blob/master/LICENSE)
