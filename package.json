@@ -1,0 +1,31 @@
+{
+  "name": "pafe",
+  "productName": "Pafe",
+  "private": true,
+  "version": "0.3.0",
+  "main": "src/main.js",
+  "license": "MIT",
+  "dependencies": {
+    "global": "^4.4.0"
+  },
+  "devDependencies": {
+    "concurrently": "^3.5.1",
+    "electron": "8.3.0",
+    "electron-packager": "^15.2.0",
+    "gulp": "^4.0.2",
+    "nodemon": "^1.17.5"
+  },
+  "build": {
+    "appId": "com.baieflow.pafe",
+    "productName": "Pafe",
+    "copyright": "Copyright © 2021 BAIEFLOW"
+  },
+  "scripts": {
+    "dev": "concurrently 'npx gulp dev' 'echo \"Running in development mode...\"'",
+    "start": "concurrently 'npx gulp start' 'echo \"Running...\"'",
+    "build": "npx electron-packager ./",
+    "build:win": "npx electron-packager ./ --platform=win32 --arch=ia32 --win32metadata.CompanyName='BAIEFLOW'",
+    "build:linux": "npx electron-packager ./ --platform=linux",
+    "clean:build": "concurrently 'rm -rf Pafe-*' 'echo \"Cleanup complete...\"'"
+  }
+}
