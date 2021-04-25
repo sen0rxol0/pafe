@@ -19,8 +19,8 @@ task('watch', async () => {
     if (typeof electron === null) { resolve(); }
     else {
       electron.kill();
-      const respawn = spawn('npx', ['electron',`${__dirname}`]);
-      // respawn.on('close', () => process.exit());
+      const respawn = spawn('npx', ['electron', `${__dirname}`]);
+      respawn.on('close', () => process.exit());
       electron = respawn;
       resolve();
     }
@@ -31,9 +31,9 @@ task('build', parallel('assets', 'js'));
 task('start', series('build', resolve => {
   setTimeout(() => {
     electron = spawn('npx', ['electron', `${__dirname}`]);
-    // electron.on('close', () => process.exit());
+    electron.on('close', () => process.exit());
     resolve();
-  }, 6000);
+  }, 2000);
 }));
 
 task('package', series('build', () => {
