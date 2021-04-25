@@ -23,9 +23,9 @@
   "scripts": {
     "dev": "concurrently 'npx gulp dev' 'echo \"Running in development mode...\"'",
     "start": "concurrently 'npx gulp start' 'echo \"Running...\"'",
-    "build": "npx electron-packager ./",
-    "build:win": "npx electron-packager ./ --platform=win32 --arch=ia32 --win32metadata.CompanyName='BAIEFLOW'",
-    "build:linux": "npx electron-packager ./ --platform=linux",
-    "clean:build": "concurrently 'rm -rf Pafe-*' 'echo \"Cleanup complete...\"'"
+    "package": "npx gulp package",
+    "package:win": "nxp gulp package:win",
+    "package:linux": "npx gulp package:linux",
+    "clean:build": "concurrently 'rm -rf build' 'echo \"Cleanup complete...\"'"
   }
 }

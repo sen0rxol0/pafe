@@ -39,8 +39,18 @@ task('start', series('build', resolve => {
   }, 6000);
 }));
 
-task('release', series('build', () => {
-  return exec(`${__dirname}/node_modules/.bin/electron-builder .`)
+task('package', series('build', () => {
+  return exec(`${__dirname}/node_modules/.bin/electron-packager ./ --overwrite --platform=darwin --arch=all --out=build`)
+    .on('close', () => process.exit());
+}));
+
+task('package:win', series('build', () => {
+  return exec(`${__dirname}/node_modules/.bin/electron-packager ./ --overwrite --platform=win32 --arch=ia32 --win32metadata.CompanyName="BAIEFLOW" --asar --out=build`)
+    .on('close', () => process.exit());
+}));
+
+task('package:linux', series('build', () => {
+  return exec(`${__dirname}/node_modules/.bin/electron-packager ./ --overwrite --platform=linux --arch=x64 --asar --out=build`)
     .on('close', () => process.exit());
 }));
 
