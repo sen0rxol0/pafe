@@ -14,6 +14,6 @@ The development files are under the `src` directory, `main.js` is the project en
 Thanks to [ElectronJS](https://github.com/electron/electron) and [Yue](https://github.com/yue/yue)
 
 ## About license
-Public domain.
-Electron is licenced under [MIT](https://github.com/electron/electron/blob/master/LICENSE)
-Yue is licenced under [LGPL v2.1](https://github.com/yue/yue/blob/master/LICENSE)
+- [MIT]()
+- Electron is licenced under [MIT](https://github.com/electron/electron/blob/master/LICENSE)
+- Yue is licenced under [LGPL v2.1](https://github.com/yue/yue/blob/master/LICENSE)
