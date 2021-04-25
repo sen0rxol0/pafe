@@ -20,7 +20,7 @@ task('watch', async () => {
     else {
       electron.kill();
       const respawn = spawn('npx', ['electron', `${__dirname}`]);
-      respawn.on('close', () => process.exit());
+      // respawn.on('close', () => process.exit());
       electron = respawn;
       resolve();
     }
@@ -31,7 +31,7 @@ task('build', parallel('assets', 'js'));
 task('start', series('build', resolve => {
   setTimeout(() => {
     electron = spawn('npx', ['electron', `${__dirname}`]);
-    electron.on('close', () => process.exit());
+    // electron.on('close', () => process.exit());
     resolve();
   }, 2000);
 }));
