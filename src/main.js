@@ -107,7 +107,7 @@ global.entryFields = [
 ];
 global.sidebarItems = [];
 global.loginAttemptCount = 0;
-global.credentials = {}
+// global.credentials = {}
 // global.settings = {}
 
 // SIZES
@@ -119,8 +119,9 @@ const INPUT_MAX_WIDTH = 384;
 const SIDEBAR_WIDTH = 92;
 const ITEM_HEIGHT = 48;
 
-console.log(systemPreferences.getAccentColor());
+// console.log(systemPreferences.getAccentColor());
 
+// COLORS
 const appearanceBasedColors = () => {
   let background = gui.Color.rgb(232,232,232),
   backgroundDarker = gui.Color.rgb(154,154,154),
@@ -152,8 +153,6 @@ const appearanceBasedColors = () => {
     warningDefault: '#b71c1c'
   }
 }
-
-// COLORS
 const COLORS = appearanceBasedColors();
 
 // STYLES
@@ -1045,8 +1044,7 @@ class PafeDelegate {
 
   initLogs() {
     app.setAppLogsPath();
-    log('', '', app.getPath('logs'));
-    log('initializing application', logType.LOG);
+    log('initializing application', logType.LOG, app.getPath('logs'));
   }
 
   initDatastore() {
@@ -1086,7 +1084,7 @@ class PafeDelegate {
     // });
   }
 
-  checkDatastore() {
+  checkDatastore() { // @TODO: fix credentials condition for when storage not created, on first run
     return storage.getData().then(storeData => {
       if ('credentials' in storeData) return true;
       return false;

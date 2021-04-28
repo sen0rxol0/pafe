@@ -1,9 +1,8 @@
 const { appendFileSync } = require('fs');
 const { join } = require('path');
-function Logger(message, type, logsPath) {
-  if (logsPath) {
+function Logger(message, type, logsPath = null) {
+  if (typeof logsPath !== 'null') {
     Logger.logsPath = logsPath;
-    return;
   }
   let log = '\n';
   switch (type) {
