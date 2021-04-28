@@ -119,17 +119,42 @@ const INPUT_MAX_WIDTH = 384;
 const SIDEBAR_WIDTH = 92;
 const ITEM_HEIGHT = 48;
 
-// COLORS
-const COLORS = {
-  background: gui.Color.rgb(255,255,255),
-  backgroundDarker: gui.Color.rgb(250,250,250),
-  bgHover: gui.Color.rgb(236,236,236),
-  text: gui.Color.rgb(0,0,0),
-  textHover: gui.Color.rgb(5,5,5),
-  textDefault: gui.Color.get('text'),
-  hintDefault: '#8b0000',
-  warningDefault: '#b71c1c'
+console.log(systemPreferences.getAccentColor());
+
+const appearanceBasedColors = () => {
+  let background = gui.Color.rgb(232,232,232),
+  backgroundDarker = gui.Color.rgb(154,154,154),
+  bgHover = gui.Color.rgb(252,252,252),
+  text = gui.Color.rgb(0,0,0),
+  textHover = gui.Color.rgb(15,15,15);
+  if (process.platform === 'darwin') {
+    if (systemPreferences.effectiveAppearance === 'dark') {
+      background = gui.Color.rgb(37,37,37);
+      backgroundDarker = gui.Color.rgb(8,8,8);
+      bgHover = gui.Color.rgb(57,57,57);
+      text = gui.Color.rgb(255,255,255);
+      textHover = gui.Color.rgb(235,235,235);
+    }
+  }
+
+  // if (process.platform !== 'linux') {
+  //     bgHover = `#${systemPreferences.getAccentColor()}`;
+  // }
+
+  return {
+    background,
+    backgroundDarker,
+    bgHover,
+    text,
+    textHover,
+    textDefault: gui.Color.get('text'),
+    hintDefault: '#8b0000',
+    warningDefault: '#b71c1c'
+  }
 }
+
+// COLORS
+const COLORS = appearanceBasedColors();
 
 // STYLES
 const STYLES = {
@@ -163,7 +188,6 @@ const STYLES = {
   },
   headers: {
     height: 32,
-    // color: '#424242',
     color: COLORS.textDefault,
     marginTop: 8,
     marginBottom: 8
@@ -405,12 +429,12 @@ class SidebarItem {
 
   onDraw(view, painter, dirty) {
     // const textBounds = this.text.attributed.getBoundsFor({ width: SIDEBAR_WIDTH, height: ITEM_HEIGHT });
-    const viewBounds = Object.assign(view.getBounds(), {x: 0, y: 0});
+    const viewBounds = Object.assign({}, view.getBounds(), {x: 0, y: 0});
     if (this.hover) {
       painter.setFillColor(COLORS.bgHover);
       painter.fillRect(viewBounds);
     }
-    this.text.attributed.setColor(this.hover ? COLORS.textDefault : COLORS.textHover);
+    this.text.attributed.setColor(this.hover ? COLORS.textHover : COLORS.textDefault);
     // const textY = (ITEM_HEIGHT - this.text.padding - textBounds.height) / 2 + this.text.padding;
     painter.drawAttributedText(this.text.attributed, viewBounds);
     // Icon.
@@ -512,7 +536,7 @@ class DatastoreEntryView {
       // entryContainer.setBackgroundColor(systemPreferences.getColor('control-background'));
     });
     this.view.addChildView(entryActionsContainer);
-    heading.setStyle(Object.assign(STYLES.headers, {marginBottom: 64}));
+    heading.setStyle(Object.assign({}, STYLES.headers, {marginBottom: 64}));
     goBackBtn.setStyle(STYLES.buttonDefault);
     editBtn.setStyle(STYLES.buttonDefaultMini);
     removeBtn.setStyle(STYLES.buttonDefaultMini);
@@ -621,6 +645,7 @@ class EntriesListItem {
       width: '100%',
       height: 64,
       marginBottom: 16,
+      // borderRadius: 4,
       // cursor: gui.Cursor.createWithType('hand')
     });
     this.hover = false;
@@ -723,14 +748,11 @@ class DatastoreTabs {
 class DatastoreView {
   constructor(passphrase = '') {
     this.view = gui.Container.create();
-    const heading = gui.Label.create('Datastore');
     const main = gui.Container.create();
-    main.addChildView(heading);
     main.addChildView(new DatastoreTabs().view);
     this.view.addChildView(new Sidebar().view);
     this.view.addChildView(main);
-    heading.setStyle(STYLES.headers);
-    main.setStyle({ flex: 1, flexDirection: 'column' });
+    main.setStyle({ flex: 1, paddingTop: 8 });
     main.setBackgroundColor(COLORS.background);
     this.view.setStyle({flex: 1, flexDirection: 'row'});
   }
