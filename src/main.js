@@ -7,7 +7,7 @@
 */
 
 /**
-* CHANGELOGS: 25/04/2021
+* CHANGELOGS: 28/04/2021
 */
 
 const path = require('path');
@@ -15,7 +15,8 @@ const gui = require('../gui');
 const {
   app,
   BrowserWindow,
-  nativeImage
+  nativeImage,
+  systemPreferences
 } = require('electron');
 
 const {
@@ -120,13 +121,12 @@ const ITEM_HEIGHT = 48;
 
 // COLORS
 const COLORS = {
-  background: '#eceff1',
-  backgroundDarker: '#cfd8dc',
-  bgHover: '#b0bec5',
-  bgSelected: '#e2e2f4',
-  text: '#000',
-  textHover: '#424242',
-  textDefault: '#fff',
+  background: gui.Color.rgb(255,255,255),
+  backgroundDarker: gui.Color.rgb(250,250,250),
+  bgHover: gui.Color.rgb(236,236,236),
+  text: gui.Color.rgb(0,0,0),
+  textHover: gui.Color.rgb(5,5,5),
+  textDefault: gui.Color.get('text'),
   hintDefault: '#8b0000',
   warningDefault: '#b71c1c'
 }
@@ -135,35 +135,36 @@ const COLORS = {
 const STYLES = {
   buttonDefault: {
     width: BUTTON_WIDTH,
-    color: '#000',
+    color: COLORS.textDefault,
     marginTop: 16,
     marginBottom: 16
   },
   buttonDefaultMini: {
     width: BUTTON_WIDTH / 2,
-    color: '#000',
+    color: COLORS.textDefault,
     // margin: 16/2
   },
   buttonDefaultBig: {
     width: BUTTON_WIDTH * 2,
     height: ITEM_HEIGHT,
-    color: '#000',
+    color: COLORS.textDefault,
     marginTop: 16,
     marginBottom: 16
   },
-  buttonBgPrimary: '#d4d4d4',
+  // buttonBgPrimary: '#d4d4d4',
   errorLabel: {
     width: '80%',
     paddingTop: 4,
     paddingBottom: 16,
-    color: '#b71c1c',
+    color: COLORS.warningDefault,
   },
   container: {
 
   },
   headers: {
     height: 32,
-    color: '#424242',
+    // color: '#424242',
+    color: COLORS.textDefault,
     marginTop: 8,
     marginBottom: 8
   }
@@ -185,13 +186,6 @@ function localize(lang, str) {
     }
   }
   return localizedText.length ? localizedText : str;
-}
-
-// Welcome to Pafe. heading, included in most views.
-function createWelcomeHeading() {
-  const heading = gui.Label.create('Welcome to Pafe.');
-  heading.setStyle({ height: 128, color: COLORS.text, backgroundColor: COLORS.background });
-  return heading;
 }
 
 /**
@@ -233,18 +227,23 @@ class Imports {
     this.view = gui.Container.create();
     this.actionsContainer = gui.Container.create();
     const heading = gui.Label.create(localize(LANG, 'Importar'));
-    const returnBtn = gui.Button.create(localize(LANG, 'Cancelar'));
+    const goBackBtn = gui.Button.create(localize(LANG, 'Cancelar'));
     const importBtn = gui.Button.create('Importar de CSV');
     importBtn.onClick = this.onImportFromFile.bind(this);
+    goBackBtn.onClick = () => {
+      setContentView(new DatastoreView().view);
+    }
+    // goBackBtn.onClick = this.onGoBack.bind(this);
     this.actionsContainer.addChildView(importBtn);
-    this.actionsContainer.addChildView(returnBtn)
+    this.actionsContainer.addChildView(goBackBtn);
     this.view.addChildView(heading);
     this.view.addChildView(this.actionsContainer);
     heading.setStyle(STYLES.headers);
-    returnBtn.setStyle(STYLES.buttonDefaultMini);
+    goBackBtn.setStyle(STYLES.buttonDefaultMini);
     importBtn.setStyle(STYLES.buttonDefault);
     this.actionsContainer.setStyle({ flex: 1, alignItems: 'center' });
-    this.view.setStyle({ flex: 1, flexDirection: 'column', backgroundColor: COLORS.backgroundDarker });
+    this.view.setStyle({ flex: 1, flexDirection: 'column' });
+    this.view.setBackgroundColor(COLORS.background);
   }
 
   onImportFromFile() {
@@ -355,65 +354,171 @@ class Imports {
   }
 }
 
-/**
-*  Creates main Authentication view
-*/
-class Authentication {
-  constructor() {
+
+
+// Part of Sidebar
+function dispatchSidebarAction(dispatch) {
+  // logger(dispatch);
+  switch (dispatch) {
+    case 'credentials':
+      // setContentView(createCredentialsView());
+      break;
+    case 'generate':
+      // setContentView(createCredentialsView());
+      break;
+    case 'import':
+        setContentView(new Imports().view);
+      break;
+    case 'settings':
+      // setContentView(createSettingsView());
+      break;
+    case 'lock':
+      onDatastoreLock();
+      break;
+    default:
+    break;
+  }
+}
+
+class SidebarItem {
+  constructor(title, dispatch) {
     this.view = gui.Container.create();
-    this.loginView = this.createLoginView();
-    const heading = gui.Label.create('Login');
-    this.view.addChildView(createWelcomeHeading());
-    this.view.addChildView(heading);
-    this.view.addChildView(this.loginView);
-    heading.setStyle(STYLES.headers);
-    this.view.setStyle({ flex: 1, flexDirection: 'column', backgroundColor: COLORS.backgroundDarker });
+    this.view.onMouseEnter = this.onMouseEnter.bind(this);
+    this.view.onMouseLeave = this.onMouseLeave.bind(this);
+    this.view.onMouseUp = this.onMouseUp.bind(this);
+    this.view.onDraw = this.onDraw.bind(this);
+    this.hover = false;
+    this.selected = false;
+    this.dispatch = dispatch;
+    this.text = {
+      padding: 4,
+      attributed: gui.AttributedText.create(title, {
+        font: gui.Font.default().derive(0, 'semi-bold', 'normal'),
+        color: COLORS.textDefault,
+        align: 'center',
+        valign: 'center',
+        // cursor: gui.Cursor.createWithType('hand')
+      })
+    };
+    this.view.setStyle({ width: '100%', height: ITEM_HEIGHT });
   }
 
-  onAttemptLogin() {
-    loginAttemptCount++;
-    if (this.passphraseField.getText().length) {
-      // loginAttemptCount = 0;
-      storage.getData()
-      .then(({credentials}) => {
-        datastore.verifyCrendentials(credentials.masterKey, this.passphraseField.getText())
-        .then((validCredentials) => {
-          if (validCredentials) {
-            storage.getData().then(({entries}) => {
-              datastore.decryptData(entries, credentials.masterKey)
-              .then((plain) => {
-                entriesData = JSON.parse(plain);
-                setContentView(new DatastoreView().view);
-              });
-            });
-          } else {
-            this.failed.setText('Frase de acesso incorrecto');
-            this.failed.setColor(COLORS.warningDefault);
-          }
-        });
-      });
-    } else {
-      this.failed.setText(localize(LANG, 'Por favor, preencha a sua frase de acesso.'));
-      this.failed.setColor(COLORS.warningDefault);
+  onDraw(view, painter, dirty) {
+    // const textBounds = this.text.attributed.getBoundsFor({ width: SIDEBAR_WIDTH, height: ITEM_HEIGHT });
+    const viewBounds = Object.assign(view.getBounds(), {x: 0, y: 0});
+    if (this.hover) {
+      painter.setFillColor(COLORS.bgHover);
+      painter.fillRect(viewBounds);
     }
+    this.text.attributed.setColor(this.hover ? COLORS.textDefault : COLORS.textHover);
+    // const textY = (ITEM_HEIGHT - this.text.padding - textBounds.height) / 2 + this.text.padding;
+    painter.drawAttributedText(this.text.attributed, viewBounds);
+    // Icon.
+    // const iconAttributes = {
+    //   x: (props.width - props.iconSize) / 2,
+    //   y: (props.height - props.padding - item.textBounds.height - props.iconSize) / 2,
+    //   width: props.iconSize,
+    //   height: props.iconSize,
+    // };
+    // item.painter.drawImage(item.icon, iconAttributes);
   }
 
-  createLoginView() {
-    const container = gui.Container.create();
-    this.failed = gui.Label.create('');
-    this.passphraseField = gui.Entry.createType('password');
-    const login = gui.Button.create(localize(LANG, 'Continuar'));
-    this.passphraseField.onActivate = this.onAttemptLogin.bind(this);
-    login.onClick = this.onAttemptLogin.bind(this);
-    container.addChildView(this.failed);
-    container.addChildView(this.passphraseField);
-    container.addChildView(login);
-    this.failed.setStyle(STYLES.errorLabel);
-    this.failed.setAlign('start');
-    this.passphraseField.setStyle({ width: INPUT_MAX_WIDTH });
-    login.setStyle(STYLES.buttonDefaultBig);
-    container.setStyle({ paddingTop: 32, flex: 1, alignItems: 'center'});
-    return container;
+  onMouseEnter() {
+   this.hover = true;
+   this.view.schedulePaint();
+  };
+
+  onMouseLeave() {
+    this.hover = false;
+    this.view.schedulePaint();
+  };
+
+  onMouseUp(view, ev) {
+    if (!this.hover) return;
+    dispatchSidebarAction(this.dispatch);
+   };
+}
+
+/**
+*  Creates sidebar component used in datastore view.
+*/
+class Sidebar {
+  constructor() {
+    if (process.platform === 'darwin') {
+      this.view = gui.Vibrant.create()
+      this.view.setBlendingMode('behind-window');
+      // this.view.setMaterial('light');
+      this.view.setMaterial('appearance-based');
+    } else {
+      this.view = gui.Container.create();
+      this.view.setBackgroundColor(COLORS.backgroundDarker);
+    }
+
+    for (const item of this.getItems()) {
+      const sidebarItem = new SidebarItem(item.title, item.dispatch);
+      // const itemIcon = gui.Image.createFromPath(path.join(__dirname, 'assets', item.icon));
+      this.view.addChildView(sidebarItem.view);
+      sidebarItems.push(sidebarItem);
+    };
+    this.view.setStyle({ flexDirection: 'column', width: SIDEBAR_WIDTH });
+  }
+
+  getItems() {
+    return [
+      // { title: localize(LANG, 'Credenciais'), dispatch: 'credentials', icon: 'credentials.png' },
+      // { title: localize(LANG, 'Gerar'), dispatch: 'generate', icon: 'generate.png' },
+      { title: localize(LANG, 'Importar'), dispatch: 'import', icon: 'import.png' },
+      { title: localize(LANG, 'Definições'), dispatch: 'settings', icon: 'settings.png' },
+      { title: localize(LANG, 'Bloquear'), dispatch: 'lock', icon: 'lock.png' },
+    ];
+  }
+}
+
+
+class DatastoreEntryView {
+  constructor(uuid) {
+    this.view = gui.Container.create();
+    const entry = entriesData.find((entryItem) => entryItem.uuid === uuid);
+    // console.log(entry);
+    const heading = gui.Label.create('Entrada');
+    const entryActionsContainer = gui.Container.create();
+    const goBackBtn = gui.Button.create('Regressar');
+    const editBtn = gui.Button.create('Editar');
+    const removeBtn = gui.Button.create('Supprimer');
+    entryActionsContainer.addChildView(goBackBtn);
+    entryActionsContainer.addChildView(editBtn);
+    entryActionsContainer.addChildView(removeBtn);
+    goBackBtn.onClick = () => {
+      setContentView(new DatastoreView().view);
+    }
+    this.view.addChildView(heading);
+    Object.getOwnPropertyNames(entry).forEach((key, i) => {
+      if (key === 'uuid' || key === 'createdAt') {
+        return;
+      }
+      const entryContainer = gui.Container.create();
+      const entryField = entryFields.find(field => field.name == key);
+      let label = null;
+      if (entryField) {
+        label = gui.Label.create(entryField.label);
+      } else {
+        label = gui.Label.create(key);
+      }
+      const value = gui.Label.create(entry[key]);
+      entryContainer.addChildView(label);
+      entryContainer.addChildView(value);
+      this.view.addChildView(entryContainer);
+      entryContainer.setStyle({maxHeight: 32, paddingLeft: 16, paddingRight: 16, marginTop: 16, flex: 1, flexDirection: 'row', justifyContent: 'space-between'});
+      // entryContainer.setBackgroundColor(systemPreferences.getColor('control-background'));
+    });
+    this.view.addChildView(entryActionsContainer);
+    heading.setStyle(Object.assign(STYLES.headers, {marginBottom: 64}));
+    goBackBtn.setStyle(STYLES.buttonDefault);
+    editBtn.setStyle(STYLES.buttonDefaultMini);
+    removeBtn.setStyle(STYLES.buttonDefaultMini);
+    entryActionsContainer.setStyle({flex: 1, flexDirection: 'row', justifyContent: 'space-around'});
+    this.view.setStyle({flex: 1, flexDirection: 'column', justifyContent: 'flex-start'});
+    this.view.setBackgroundColor(COLORS.background);
   }
 }
 
@@ -443,7 +548,7 @@ function createDatastoreAdd() {
     field.getText = () => input.getText();
     field.addChildView(label);
     field.addChildView(input);
-    label.setStyle({ height: 16, marginBottom: 4, color: '#888' })
+    label.setStyle({ marginBottom: 4, color: '#888' });
     label.setAlign('start');
     input.setStyle({ width: '100%' });
     field.setStyle({ maxHeight: 56, flex: 1, flexDirection: 'column' });
@@ -494,38 +599,43 @@ function createDatastoreAdd() {
   genButton.setStyle(STYLES.buttonDefaultMini);
   passFieldContainer.setStyle({ maxHeight: 56, flex: 1, flexDirection: 'row', alignItems: 'flex-end' });
   submit.setStyle(STYLES.buttonDefaultBig);
-  fields.setStyle({ width: '100%', padding: 16, flex: 1, flexDirection: 'column' });
+  fields.setStyle({ width: '100%', paddingLeft: 16, paddingRight: 16, flex: 1, flexDirection: 'column' });
   container.setStyle({ flex: 1, flexDirection: 'column', alignItems: 'center' });
   return container;
 }
 
-class EntriesItemView {
-  constructor(title, type) {
-    const titleLabel = gui.Label.create(title);
-    const typeLabel = gui.Label.create(type);
+class EntriesListItem {
+  constructor(title, item) {
+    this.item = item;
     this.view = gui.Container.create();
-    // this.selected = false;
-    this.view.addChildView(titleLabel);
-    this.view.addChildView(typeLabel);
-    // title.setStyle({ width: '92%', color: COLORS.text, align: 'center' });
-    // type.setStyle({ width: '92%', color: COLORS.text, align: 'end' })
+    this.text = gui.AttributedText.create(title, {
+      font: gui.Font.default().derive(4, 'bold', 'normal'),
+      valign: 'center',
+      // align: 'center'
+    });
     this.view.onMouseEnter = this.onMouseEnter.bind(this);
     this.view.onMouseLeave = this.onMouseLeave.bind(this);
-    this.view.onMouseUp = this.onMouseUp.bind(this);
+    this.view.onMouseUp = this.onViewEntry.bind(this);
     this.view.onDraw = this.onDraw.bind(this);
     this.view.setStyle({
+      width: '100%',
       height: 64,
       marginBottom: 16,
-      backgroundColor: COLORS.backgroundDarker
+      // cursor: gui.Cursor.createWithType('hand')
     });
     this.hover = false;
   }
 
   onDraw(view, painter, dirty) {
+    const viewBounds = Object.assign(view.getBounds(), {x: 0, y: 0});
     if (this.hover) {
       painter.setFillColor(COLORS.bgHover);
-      painter.fillRect(Object.assign(view.getBounds(), {x: 0, y: 0}));
+      painter.fillRect(viewBounds);
     }
+
+    viewBounds.x = 8;
+    viewBounds.width -= 8;
+    painter.drawAttributedText(this.text, viewBounds);
   }
 
   onMouseEnter(view) {
@@ -538,31 +648,34 @@ class EntriesItemView {
     this.view.schedulePaint();
   }
 
-  onMouseUp() {
+  onViewEntry() {
     if (!this.hover) return;
+    setContentView(new DatastoreEntryView(this.item).view);
     // this.
   }
+
 }
 
 /**
 *  Creates entry list page in datastore entries tab.
 */
-class TabDatastoreList {
+class EntriesListTab {
   constructor() {
     this.view = gui.Scroll.create();
     this.entries = gui.Container.create();
     this.searchView = this.entriesSearchView();
     this.entries.addChildView(this.searchView);
     for (const entry of this.getEntries()) {
-      const entryItem = new EntriesItemView(entry.title, entry.type);
+      const entryItem = new EntriesListItem(entry.title, entry.uuid);
       this.entries.addChildView(entryItem.view);
       entries.push(entryItem);
     }
 
-    this.entries.setStyle({ flex: 1, flexDirection: 'column' });
+    this.entries.setStyle({ paddingLeft: 16, paddingRight: 16, flex: 1, flexDirection: 'column' });
     this.view.setContentSize(this.entries.getPreferredSize());
-    this.view.setScrollbarPolicy('never', 'always');
+    this.view.setScrollbarPolicy('never', 'automatic');
     this.view.setContentView(this.entries);
+    // this.view.setBackgroundColor(COLORS.backgroundDarker);
   }
 
   onEntriesSearch() {
@@ -581,7 +694,7 @@ class TabDatastoreList {
     const search = gui.Entry.create();
     search.onActivate = this.onEntriesSearch.bind(this);
     container.addChildView(search);
-    container.setStyle({ marginBottom: 32 });
+    container.setStyle({ marginTop: 16, marginBottom: 16 });
     return container;
   }
 }
@@ -594,139 +707,13 @@ function createDatastoreActivity() {
   return container;
 }
 
-class TabsDatastore {
+class DatastoreTabs {
   constructor() {
     this.view = gui.Tab.create();
-    this.view.addPage(localize(LANG, 'Entradas'), this.listPage());
-    // this.view.addPage(localize(LANG, 'Atividades'), this.activityPage());
-    this.view.addPage(localize(LANG, 'Adicionar nova'), this.addPage());
+    this.view.addPage(localize(LANG, 'Entradas'), new EntriesListTab().view);
+    // this.view.addPage(localize(LANG, 'Atividades'), createDatastoreActivity());
+    this.view.addPage(localize(LANG, 'Adicionar nova'), createDatastoreAdd());
     this.view.setStyle({ flex: 1, alignItems: 'center', backgroundColor: COLORS.backgroundDarker, color: COLORS.text });
-  }
-
-  listPage() {
-    return new TabDatastoreList().view;
-  }
-
-  // activityPage() {
-  //   return createDatastoreActivity();
-  // }
-
-  addPage() {
-    return createDatastoreAdd();
-  }
-}
-
-// Part of addSidebarItems
-function dispatchSidebarAction(dispatch) {
-  // logger(dispatch);
-  switch (dispatch) {
-    case 'credentials':
-      // setContentView(createCredentialsView());
-      break;
-    case 'generate':
-      // setContentView(createCredentialsView());
-      break;
-    case 'import':
-        setContentView(new Imports().view);
-      break;
-    case 'settings':
-      // setContentView(createSettingsView());
-      break;
-    case 'lock':
-      setContentView(new Authentication().view);
-      break;
-    default:
-    break;
-  }
-}
-
-class SidebarItemView {
-  constructor(title, dispatch) {
-    this.hover = false;
-    this.selected = false;
-    this.title = title;
-    this.dispatch = dispatch;
-    this.font = gui.Font.create('system-ui', 14, 'normal', 'normal');
-    this.view = gui.Container.create();
-    this.view.onMouseEnter = this.onMouseEnter.bind(this);
-    this.view.onMouseLeave = this.onMouseLeave.bind(this);
-    this.view.onMouseUp = this.onMouseUp.bind(this);
-    this.view.onDraw = this.onDraw.bind(this);
-    this.view.setStyle({ width: '100%', height: ITEM_HEIGHT });
-  }
-
-  onDraw(view, painter, dirty) {
-    const padding = 4;
-    const attributedText = { font: this.font, color: COLORS.text, align: 'center'};
-    const itemText = gui.AttributedText.create(this.title, attributedText);
-    const textBounds = itemText.getBoundsFor({ width: SIDEBAR_WIDTH, height: ITEM_HEIGHT });
-    // Background.
-    if (this.selected || this.hover) {
-      painter.setFillColor(COLORS.bgHover);
-      painter.fillRect(Object.assign(view.getBounds(), {x: 0, y: 0}));
-    }
-    if (this.selected) {
-      painter.setFillColor(COLORS.bgSelected);
-      painter.fillRect(Object.assign(view.getBounds(), {x: 0, y: 0}));
-    }
-    // Text.
-    itemText.setColor((this.selected || this.hover) ? COLORS.text : COLORS.textHover);
-    // const textY = (props.height - props.padding - item.current.textBounds.height - props.iconSize) / 2 + props.iconSize + props.padding;
-    const textY = (ITEM_HEIGHT - padding - textBounds.height) / 2 + padding;
-    const textAttributes = { x: 0, y: textY, width: SIDEBAR_WIDTH, height: textBounds.height };
-    painter.drawAttributedText(itemText, textAttributes);
-    // Icon.
-    // const iconAttributes = {
-    //   x: (props.width - props.iconSize) / 2,
-    //   y: (props.height - props.padding - item.textBounds.height - props.iconSize) / 2,
-    //   width: props.iconSize,
-    //   height: props.iconSize,
-    // };
-    // item.painter.drawImage(item.icon, iconAttributes);
-  }
-
-  onMouseEnter() {
-   this.hover = true;
-   this.view.schedulePaint();
-  };
-
-  onMouseLeave() {
-    this.hover = false;
-    this.view.schedulePaint();
-  };
-
-  onMouseUp(view, ev) {
-    if (!this.hover) return;
-    // this.selected = true;
-    // this.view.schedulePaint();
-    dispatchSidebarAction(this.dispatch);
-   };
-}
-
-/**
-*  Creates sidebar component used in datastore view.
-*/
-class Sidebar {
-  constructor() {
-    this.view = gui.Container.create();
-    for (const item of this.getItems()) {
-      const sidebarItem = new SidebarItemView(item.title, item.dispatch);
-      // const itemIcon = gui.Image.createFromPath(path.join(__dirname, 'assets', item.icon));
-      this.view.addChildView(sidebarItem.view);
-      sidebarItems.push(sidebarItem);
-    };
-    this.view.setStyle({ flexDirection: 'column', width: SIDEBAR_WIDTH });
-    this.view.setBackgroundColor(COLORS.background);
-  }
-
-  getItems() {
-    return [
-      // { title: localize(LANG, 'Credenciais'), dispatch: 'credentials', icon: 'credentials.png' },
-      // { title: localize(LANG, 'Gerar'), dispatch: 'generate', icon: 'generate.png' },
-      { title: localize(LANG, 'Importar'), dispatch: 'import', icon: 'import.png' },
-      { title: localize(LANG, 'Definições'), dispatch: 'settings', icon: 'settings.png' },
-      { title: localize(LANG, 'Bloquear'), dispatch: 'lock', icon: 'lock.png' },
-    ];
   }
 }
 
@@ -739,13 +726,17 @@ class DatastoreView {
     const heading = gui.Label.create('Datastore');
     const main = gui.Container.create();
     main.addChildView(heading);
-    main.addChildView(new TabsDatastore().view);
+    main.addChildView(new DatastoreTabs().view);
     this.view.addChildView(new Sidebar().view);
     this.view.addChildView(main);
     heading.setStyle(STYLES.headers);
     main.setStyle({ flex: 1, flexDirection: 'column' });
-    main.setBackgroundColor(COLORS.backgroundDarker);
-    this.view.setStyle({flex: 1, flexDirection: 'row', backgroundColor: COLORS.background});
+    main.setBackgroundColor(COLORS.background);
+    this.view.setStyle({flex: 1, flexDirection: 'row'});
+  }
+
+  onViewEntry() {
+
   }
 }
 
@@ -867,7 +858,8 @@ class Setup {
     passError.setStyle(STYLES.errorLabel);
     passError.setAlign('start');
     continueButton.setStyle({ alignSelf: 'center', ...STYLES.buttonDefaultBig });
-    container.setStyle({ flex: 1, flexDirection: 'column', backgroundColor: COLORS.backgroundDarker });
+    container.setStyle({ flex: 1, flexDirection: 'column' });
+    container.setBackgroundColor(COLORS.background);
     return container;
   }
 
@@ -878,13 +870,14 @@ class Setup {
     container.addChildView(heading);
     container.addChildView(containerLabel);
     containerLabel.setStyle(STYLES.headers);
-    container.setStyle({ flex: 1, backgroundColor: COLORS.backgroundDarker});
+    container.setStyle({ flex: 1 });
+    container.setBackgroundColor(COLORS.background);
     return container;
   }
 }
 
 /**
-*
+* Creates Welcome view, presenting datastore setup for the user.
 */
 class Welcome {
   constructor() {
@@ -939,7 +932,7 @@ class Welcome {
     setupContainer.addChildView(this.setupSyncView());
     setupContainer.addChildView(this.setupNewView());
     setupContainer.setStyle({ padding: 16, flex: 1, flexDirection: 'row' });
-    setupContainer.setBackgroundColor(COLORS.backgroundDarker);
+    // setupContainer.setBackgroundColor(COLORS.backgroundDarker);
     return setupContainer;
   }
 
@@ -949,21 +942,67 @@ class Welcome {
     continueBtn.onClick = this.onLogin;
     authContainer.addChildView(continueBtn);
     authContainer.setStyle({ flex: 1, alignItems: 'center' });
-    authContainer.setBackgroundColor(COLORS.backgroundDarker);
+    // authContainer.setBackgroundColor(COLORS.backgroundDarker);
     continueBtn.setStyle(STYLES.buttonDefaultBig);
     return authContainer;
   }
 }
 
-function createLoadingIndicator() {
-  const container = gui.Container.create();
-  const loading = gui.GifPlayer.create();
-  container.addChildView(loading);
-  loading.setStyle({ width: 40, height: 40 });
-  // loading.setImage(gui.Image.createFromPath(path.join(__dirname, 'assets', 'loading.gif')));
-  loading.setAnimating(true);
-  container.setStyle({ flex: 1, alignItems: 'center', justifyContent: 'center', minWidth: 50, minHeight: 50 });
-  return container;
+
+/**
+*  Creates main Authentication view
+*/
+class Authentication {
+  constructor() {
+    this.view = gui.Container.create();
+    this.loginView = this.createLoginView();
+    const heading = gui.Label.create('Login');
+    this.view.addChildView(createWelcomeHeading());
+    this.view.addChildView(heading);
+    this.view.addChildView(this.loginView);
+    heading.setStyle(STYLES.headers);
+    this.view.setStyle({ flex: 1, flexDirection: 'column' });
+    this.view.setBackgroundColor(COLORS.background);
+  }
+
+  onAttemptLogin() {
+    loginAttemptCount++;
+    // const passphrase = this.passphraseField.getText();
+    const passphrase = 'Seguro@myFPasswordIsb1gL0n6';
+    if (passphrase.length) {
+      // loginAttemptCount = 0;
+      onDatastoreUnlock(passphrase)
+      // onDatastoreUnlock(this.passphraseField.getText())
+      .then(() => {
+        setContentView(new DatastoreView().view);
+      }, () => {
+        this.failed.setText('Frase de acesso incorrecto');
+        this.failed.setColor(COLORS.warningDefault);
+      });
+    } else {
+      this.failed.setText(localize(LANG, 'Por favor, preencha a sua frase de acesso.'));
+      this.failed.setColor(COLORS.warningDefault);
+    }
+  }
+
+  createLoginView() {
+    const container = gui.Container.create();
+    this.failed = gui.Label.create('');
+    this.passphraseField = gui.Entry.createType('password');
+    const login = gui.Button.create(localize(LANG, 'Continuar'));
+    this.passphraseField.onActivate = this.onAttemptLogin.bind(this);
+    login.onClick = this.onAttemptLogin.bind(this);
+    container.addChildView(this.failed);
+    container.addChildView(this.passphraseField);
+    container.addChildView(login);
+    this.failed.setStyle(STYLES.errorLabel);
+    this.failed.setAlign('start');
+    this.passphraseField.setStyle({ width: INPUT_MAX_WIDTH });
+    login.setStyle(STYLES.buttonDefaultBig);
+    container.setStyle({ paddingTop: 32, flex: 1, alignItems: 'center' });
+    // container.setBackgroundColor(COLORS.backgroundDarker);
+    return container;
+  }
 }
 
 class PafeDelegate {
@@ -973,6 +1012,11 @@ class PafeDelegate {
   }
 
   onReadyLaunchGUI() {
+    const appIconPath = path.join(__dirname, 'assets', 'icon.png');
+    if (process.platform === 'darwin') {
+      const appIcon = nativeImage.createFromPath(appIconPath);
+      app.dock.setIcon(appIcon);
+    }
     this.initDatastore();
     this.createMainWindow();
   }
@@ -1020,23 +1064,28 @@ class PafeDelegate {
     // });
   }
 
+  checkDatastore() {
+    return storage.getData().then(storeData => {
+      if ('credentials' in storeData) return true;
+      return false;
+    });
+  }
+
   createMainWindow() {
     global.setContentView = this.onSetContentView;
     window = gui.Window.create({});
 
     const appIconPath = path.join(__dirname, 'assets', 'icon.png');
-    if (process.platform === 'darwin') {
-      const appIcon = nativeImage.createFromPath(appIconPath);
-      app.dock.setIcon(appIcon);
-    } else {
+    if (process.platform !== 'darwin') {
       const appIcon = gui.Image.createFromPath(appIconPath);
       window.setIcon(appIcon);
     }
 
-    //@TODO: check if user data exists and show view accordingly
-    // if not user data, show welcome, else, show authentication
-    setContentView(this.getWelcomeView());
-    // setContentView(this.getAuthenticationView());
+    if (this.checkDatastore()) {
+      setContentView(this.getAuthenticationView());
+    } else {
+      setContentView(this.getWelcomeView());
+    }
     window.setContentSize({ width: WINDOW_WIDTH, height: WINDOW_HEIGHT });
     window.setTitle(app.name);
     window.onClose = () => {
@@ -1067,9 +1116,54 @@ class PafeDelegate {
   }
 }
 
+
+function onDatastoreUnlock(passphrase) {
+  return new Promise((resolve, reject) => {
+    storage.getData()
+    .then(({credentials}) => {
+      datastore.verifyCrendentials(credentials.masterKey, passphrase)
+      .then((validCredentials) => {
+        if (validCredentials) {
+          storage.getData().then(({entries}) => {
+            datastore.decryptData(entries, credentials.masterKey)
+            .then((plain) => {
+              entriesData = JSON.parse(plain);
+              resolve();
+            });
+          });
+        } else {
+          reject();
+        }
+      });
+    });
+  });
+}
+
+function onDatastoreLock() {
+  entriesData = [];
+  setContentView(new Authentication().view);
+}
+
+// Welcome to Pafe. heading, included in most views.
+function createWelcomeHeading() {
+  const heading = gui.Label.create('Welcome to Pafe.');
+  heading.setStyle({ height: 128, color: COLORS.text });
+  return heading;
+}
+
+function createLoadingIndicator() {
+  const container = gui.Container.create();
+  const loading = gui.GifPlayer.create();
+  container.addChildView(loading);
+  loading.setStyle({ width: 40, height: 40 });
+  // loading.setImage(gui.Image.createFromPath(path.join(__dirname, 'assets', 'loading.gif')));
+  loading.setAnimating(true);
+  container.setStyle({ flex: 1, alignItems: 'center', justifyContent: 'center', minWidth: 50, minHeight: 50 });
+  return container;
+}
+
 function main() {
   new PafeDelegate();
-  // console.log(app.getPath('userData'));
   storage = new Storage(app.getPath('userData'));
   // storage.getData().then((data) => {
   //   if ('entries' in data) {
