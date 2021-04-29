@@ -1,5 +1,6 @@
 const { exec, spawn } = require('child_process');
 const { task, src, dest, watch, parallel, series } = require('gulp');
+const buildMeta = require('./package.json').build;
 
 var electron = null;
 
@@ -15,7 +16,7 @@ task('js', resolve => {
 
 task('watch', async () => {
   // watch(`${__dirname}/assets/**/*.{jpg,jpeg,png,svg,gif}`, task('assets'));
-  watch(`${__dirname}/src/**/*.{js,jsx}`, resolve => {
+  watch(`${__dirname}/src/**/*.{js}`, resolve => {
     if (typeof electron === null) { resolve(); }
     else {
       electron.kill();
@@ -36,18 +37,18 @@ task('start', series('build', resolve => {
   }, 2000);
 }));
 
-task('package', series('build', () => {
-  return exec(`${__dirname}/node_modules/.bin/electron-packager ./ --platform=darwin --arch=all --out=build --overwrite`)
+task('pack', series('build', () => {
+  return exec(`${__dirname}/node_modules/.bin/electron-packager ./ --platform=darwin --arch=x64 --icon=src/assets/icons.icns --prune=true --out=build --overwrite`)
     .on('close', () => process.exit());
 }));
 
-task('package:win', series('build', () => {
-  return exec(`${__dirname}/node_modules/.bin/electron-packager ./ --platform=win32 --arch=ia32 --win32metadata.CompanyName="BAIEFLOW" --asar --out=build --overwrite`)
+task('pack:win', series('build', () => {
+  return exec(`${__dirname}/node_modules/.bin/electron-packager ./ --platform=win32 --arch=ia32 --icon=src/assets/icon.png --prune=true --win32metadata.CompanyName="BAIEFLOW" --asar --out=build --overwrite`)
     .on('close', () => process.exit());
 }));
 
-task('package:linux', series('build', () => {
-  return exec(`${__dirname}/node_modules/.bin/electron-packager ./ --platform=linux --arch=x64 --asar --out=build --overwrite`)
+task('pack:linux', series('build', () => {
+  return exec(`${__dirname}/node_modules/.bin/electron-packager ./ --platform=linux --arch=x64 --icon=src/assets/icon.png --prune=true --asar --out=build --overwrite`)
     .on('close', () => process.exit());
 }));
 
