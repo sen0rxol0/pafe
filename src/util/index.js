@@ -5,7 +5,6 @@ const Logger = require('./logger');
 
 module.exports = {
   log: Logger,
-  logType: Logger.Type,
   getDefaultLocales() {
     return locales;
   },

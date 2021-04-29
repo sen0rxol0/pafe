@@ -7,7 +7,7 @@
 */
 
 /**
-* CHANGELOGS: 28/04/2021
+* CHANGELOGS: 29/04/2021
 */
 
 const path = require('path');
@@ -25,7 +25,6 @@ const {
 } = require('./core/'),
 {
   log,
-  logType,
   getDefaultLocales,
   uuidGenerator,
   readFromCSV,
@@ -245,6 +244,14 @@ function localize(lang, str) {
 //   return container;
 // }
 
+
+class Settings {
+  constructor() {
+    this.view = gui.Container.create();
+    this.view.setStyle({ flex: 1 });
+  }
+}
+
 class Imports {
   constructor() {
     this.view = gui.Container.create();
@@ -377,11 +384,9 @@ class Imports {
   }
 }
 
-
-
 // Part of Sidebar
 function dispatchSidebarAction(dispatch) {
-  // logger(dispatch);
+  log(`Dispatching action for ${dispatch}`, log.INFO);
   switch (dispatch) {
     case 'credentials':
       // setContentView(createCredentialsView());
@@ -390,10 +395,10 @@ function dispatchSidebarAction(dispatch) {
       // setContentView(createCredentialsView());
       break;
     case 'import':
-        setContentView(new Imports().view);
+      setContentView(new Imports().view);
       break;
     case 'settings':
-      // setContentView(createSettingsView());
+      setContentView(new Settings().view);
       break;
     case 'lock':
       onDatastoreLock();
@@ -470,7 +475,6 @@ class Sidebar {
     if (process.platform === 'darwin') {
       this.view = gui.Vibrant.create()
       this.view.setBlendingMode('behind-window');
-      // this.view.setMaterial('light');
       this.view.setMaterial('appearance-based');
     } else {
       this.view = gui.Container.create();
@@ -497,8 +501,11 @@ class Sidebar {
   }
 }
 
+class DatastoreEntryEdit {
 
-class DatastoreEntryView {
+}
+
+class DatastoreEntryShow {
   constructor(uuid) {
     this.view = gui.Container.create();
     const entry = entriesData.find((entryItem) => entryItem.uuid === uuid);
@@ -546,85 +553,80 @@ class DatastoreEntryView {
 }
 
 /**
-*  Creates add entry page in datastore add entry tab.
+*  Creates Datastore entry add page in Datastore tabs.
 */
-function createDatastoreAdd() {
-  // const uuid, group, title, username, email, notes, password, createTime, modifyTime, url, autotype:bool
-  let passphrase = '';
-  const container = gui.Container.create();
-  const containerLabel = gui.Label.create(localize(LANG, 'Adicionar uma nova entrada'));
-  containerLabel.setStyle(STYLES.headers);
-  container.addChildView(containerLabel);
+class DatastoreEntriesAddTab {
+  constructor() {
+    // const uuid, title, username, email, notes, password, createTime, modifyTime, url, autotype:bool
+    this.view = gui.Container.create();
+    const heading = gui.Label.create(localize(LANG, 'Adicionar uma nova entrada'));
+    const submit = gui.Button.create(localize(LANG, 'Guardar...'));
+    this.view.addChildView(heading);
+    this.view.addChildView(this.createFields());
+    this.view.addChildView(submit);
+    heading.setStyle(STYLES.headers);
+    submit.setStyle(STYLES.buttonDefaultBig);
+    this.view.setStyle({ flex: 1, flexDirection: 'column', alignItems: 'center' });
+  }
 
-  function createField(title, type, on) {
-    const field = gui.Container.create();
-    const label = gui.Label.create(title);
-    const input = gui.Entry.createType(type);
-    if (on && Object.keys(on).length) {
-      if ('textChange' in on) {
-        input.onTextChange = on.textChange;
+  createFields() {
+    const fields = gui.Container.create();
+    const passFieldContainer = gui.Container.create();
+    const viewBtn = gui.Button.create(localize(LANG, 'Mostrar'));
+    const generateBtn = gui.Button.create(localize(LANG, 'Gerar'));
+    viewBtn.onClick = (btn) => {};
+    generateBtn.onClick = (btn) => {};
+    const passField = createField(localize(LANG, 'Palavra-passe'), 'password', {
+      textChange: () => {
+        if (passField.getText().length) {
+          // passphrase = fieldPass.getText();
+          // fieldPassView.setText(passphrase);
+        } else {
+          // passphrase = '';
+        }
+      },
+      activate: () => { }
+    });
+
+    const titleField = createField(localize(LANG, 'Título'), 'normal');
+    const siteField = createField('Site', 'normal');
+    const usernameField = createField(localize(LANG, 'Nome do usuário'), 'normal');
+
+    passFieldContainer.addChildView(passField);
+    passFieldContainer.addChildView(viewBtn);
+    passFieldContainer.addChildView(generateBtn);
+    fields.addChildView(titleField);
+    fields.addChildView(siteField);
+    fields.addChildView(usernameField);
+    fields.addChildView(passFieldContainer);
+    viewBtn.setStyle(STYLES.buttonDefaultMini);
+    generateBtn.setStyle(STYLES.buttonDefaultMini);
+    passFieldContainer.setStyle({ maxHeight: 56, flex: 1, flexDirection: 'row', alignItems: 'flex-end' });
+    fields.setStyle({ width: '100%', paddingLeft: 16, paddingRight: 16, flex: 1, flexDirection: 'column' });
+
+    function createField(title, type, on) {
+      const field = gui.Container.create();
+      const label = gui.Label.create(title);
+      const input = gui.Entry.createType(type);
+      if (on && Object.keys(on).length) {
+        if ('textChange' in on) {
+          input.onTextChange = on.textChange;
+        }
+        if ('activate' in on) {
+          input.onActivate = on.activate;
+        }
       }
-      if ('activate' in on) {
-        input.onActivate = on.activate;
-      }
+      field.getText = () => input.getText();
+      field.addChildView(label);
+      field.addChildView(input);
+      label.setStyle({ marginBottom: 4, color: COLORS.textDefault });
+      label.setAlign('start');
+      input.setStyle({ width: '100%' });
+      field.setStyle({ maxHeight: 56, flex: 1, flexDirection: 'column' });
+      return field;
     }
-    field.getText = () => input.getText();
-    field.addChildView(label);
-    field.addChildView(input);
-    label.setStyle({ marginBottom: 4, color: '#888' });
-    label.setAlign('start');
-    input.setStyle({ width: '100%' });
-    field.setStyle({ maxHeight: 56, flex: 1, flexDirection: 'column' });
-    return field;
+    return fields;
   }
-
-  const fields = gui.Container.create();
-  const submit = gui.Button.create(localize(LANG, 'Guardar...'));
-  const fieldTitle = createField(localize(LANG, 'Título'), 'normal');
-  const fieldHost = createField('Site', 'normal');
-  const fieldName = createField(localize(LANG, 'Nome do usuário'), 'normal');
-  fields.addChildView(fieldTitle);
-  fields.addChildView(fieldHost);
-  fields.addChildView(fieldName);
-
-  // const fieldPassView = gui.Label.create('confirmation: ');
-  // fieldPassView.setStyle({ height: 32, color: '#888', padding: 4 });
-  const passFieldContainer = gui.Container.create();
-  const fieldPass = createField(localize(LANG, 'Palavra-passe'), 'password', {
-    textChange: () => {
-      if (fieldPass.getText().length) {
-        passphrase = fieldPass.getText();
-        // fieldPassView.setText(passphrase);
-      } else {
-        passphrase = '';
-      }
-    },
-    activate: () => { }
-  });
-  const viewButton = gui.Button.create(localize(LANG, 'Mostrar'));
-  const genButton = gui.Button.create(localize(LANG, 'Gerar'));
-  const onToggleViewPassphrase = (btn) => {
-
-  }
-  const onGeneratePassphrase = (btn) => {
-
-  }
-  viewButton.onClick = onToggleViewPassphrase;
-  genButton.onClick = onGeneratePassphrase;
-  passFieldContainer.addChildView(fieldPass);
-  passFieldContainer.addChildView(viewButton);
-  passFieldContainer.addChildView(genButton);
-  fields.addChildView(passFieldContainer);
-  // fields.addChildView(fieldPassView);
-  container.addChildView(fields);
-  container.addChildView(submit);
-  viewButton.setStyle(STYLES.buttonDefaultMini);
-  genButton.setStyle(STYLES.buttonDefaultMini);
-  passFieldContainer.setStyle({ maxHeight: 56, flex: 1, flexDirection: 'row', alignItems: 'flex-end' });
-  submit.setStyle(STYLES.buttonDefaultBig);
-  fields.setStyle({ width: '100%', paddingLeft: 16, paddingRight: 16, flex: 1, flexDirection: 'column' });
-  container.setStyle({ flex: 1, flexDirection: 'column', alignItems: 'center' });
-  return container;
 }
 
 class EntriesListItem {
@@ -638,7 +640,7 @@ class EntriesListItem {
     });
     this.view.onMouseEnter = this.onMouseEnter.bind(this);
     this.view.onMouseLeave = this.onMouseLeave.bind(this);
-    this.view.onMouseUp = this.onViewEntry.bind(this);
+    this.view.onMouseUp = this.onShowEntry.bind(this);
     this.view.onDraw = this.onDraw.bind(this);
     this.view.setStyle({
       width: '100%',
@@ -651,7 +653,7 @@ class EntriesListItem {
   }
 
   onDraw(view, painter, dirty) {
-    const viewBounds = Object.assign(view.getBounds(), {x: 0, y: 0});
+    const viewBounds = Object.assign({}, view.getBounds(), {x: 0, y: 0});
     if (this.hover) {
       painter.setFillColor(COLORS.bgHover);
       painter.fillRect(viewBounds);
@@ -672,18 +674,17 @@ class EntriesListItem {
     this.view.schedulePaint();
   }
 
-  onViewEntry() {
+  onShowEntry() {
     if (!this.hover) return;
-    setContentView(new DatastoreEntryView(this.item).view);
+    setContentView(new DatastoreEntryShow(this.item).view);
     // this.
   }
-
 }
 
 /**
 *  Creates entry list page in datastore entries tab.
 */
-class EntriesListTab {
+class DatastoreEntriesListTab {
   constructor() {
     this.view = gui.Scroll.create();
     this.entries = gui.Container.create();
@@ -734,10 +735,10 @@ function createDatastoreActivity() {
 class DatastoreTabs {
   constructor() {
     this.view = gui.Tab.create();
-    this.view.addPage(localize(LANG, 'Entradas'), new EntriesListTab().view);
+    this.view.addPage(localize(LANG, 'Entradas'), new DatastoreEntriesListTab().view);
     // this.view.addPage(localize(LANG, 'Atividades'), createDatastoreActivity());
-    this.view.addPage(localize(LANG, 'Adicionar nova'), createDatastoreAdd());
-    this.view.setStyle({ flex: 1, alignItems: 'center', backgroundColor: COLORS.backgroundDarker, color: COLORS.text });
+    this.view.addPage(localize(LANG, 'Adicionar nova'), new DatastoreEntriesAddTab().view);
+    this.view.setStyle({ flex: 1, alignItems: 'center', color: COLORS.text });
   }
 }
 
@@ -745,22 +746,17 @@ class DatastoreTabs {
 *  Creates datastore view, which is composed of a sidebar and tabs.
 */
 class DatastoreView {
-  constructor(passphrase = '') {
+  constructor() {
     this.view = gui.Container.create();
     const main = gui.Container.create();
-    main.addChildView(new DatastoreTabs().view);
     this.view.addChildView(new Sidebar().view);
+    main.addChildView(new DatastoreTabs().view);
     this.view.addChildView(main);
     main.setStyle({ flex: 1, paddingTop: 8 });
     main.setBackgroundColor(COLORS.background);
     this.view.setStyle({flex: 1, flexDirection: 'row'});
   }
-
-  onViewEntry() {
-
-  }
 }
-
 
 class Setup {
   constructor(type) {
@@ -969,7 +965,6 @@ class Welcome {
   }
 }
 
-
 /**
 *  Creates main Authentication view
 */
@@ -987,6 +982,7 @@ class Authentication {
   }
 
   onAttemptLogin() {
+    log('Attempting datastore authentication', log.INFO);
     loginAttemptCount++;
     // const passphrase = this.passphraseField.getText();
     const passphrase = 'Seguro@myFPasswordIsb1gL0n6';
@@ -1001,6 +997,7 @@ class Authentication {
         this.failed.setColor(COLORS.warningDefault);
       });
     } else {
+      log('Datastore authentication failed', log.INFO);
       this.failed.setText(localize(LANG, 'Por favor, preencha a sua frase de acesso.'));
       this.failed.setColor(COLORS.warningDefault);
     }
@@ -1044,7 +1041,7 @@ class PafeDelegate {
 
   initLogs() {
     app.setAppLogsPath();
-    log('initializing application', logType.LOG, app.getPath('logs'));
+    log('Initializing application', log.LOG, app.getPath('logs'));
   }
 
   initDatastore() {
@@ -1136,8 +1133,8 @@ class PafeDelegate {
   }
 }
 
-
 function onDatastoreUnlock(passphrase) {
+  log('Unlocking datastore', log.INFO);
   return new Promise((resolve, reject) => {
     storage.getData()
     .then(({credentials}) => {
@@ -1160,6 +1157,7 @@ function onDatastoreUnlock(passphrase) {
 }
 
 function onDatastoreLock() {
+  log('Locking datastore', log.INFO);
   entriesData = [];
   setContentView(new Authentication().view);
 }
