@@ -1030,7 +1030,7 @@ class PafeDelegate {
   }
 
   onReadyLaunchGUI() {
-    const appIconPath = path.join(__dirname, 'assets', 'icon.png');
+    const appIconPath = path.join(__dirname, 'assets', 'icon_512x512.png');
     if (process.platform === 'darwin') {
       const appIcon = nativeImage.createFromPath(appIconPath);
       app.dock.setIcon(appIcon);
@@ -1092,7 +1092,7 @@ class PafeDelegate {
     global.setContentView = this.onSetContentView;
     window = gui.Window.create({});
 
-    const appIconPath = path.join(__dirname, 'assets', 'icon.png');
+    const appIconPath = path.join(__dirname, 'assets', 'icon_512x512.png');
     if (process.platform !== 'darwin') {
       const appIcon = gui.Image.createFromPath(appIconPath);
       window.setIcon(appIcon);
