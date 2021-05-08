@@ -7,7 +7,7 @@
 */
 
 /**
-* CHANGELOGS: 29/04/2021
+* CHANGELOGS: 04/05/2021
 */
 
 const path = require('path');
@@ -117,8 +117,6 @@ const INPUT_WIDTH = 256;
 const INPUT_MAX_WIDTH = 384;
 const SIDEBAR_WIDTH = 92;
 const ITEM_HEIGHT = 48;
-
-// console.log(systemPreferences.getAccentColor());
 
 // COLORS
 const appearanceBasedColors = () => {
@@ -1085,6 +1083,15 @@ class PafeDelegate {
     return storage.getData().then(storeData => {
       if ('credentials' in storeData) return true;
       return false;
+    }, err => {
+      console.log(err);
+      if (err.code === 'ENOENT') {
+        logger('Creating storage file with initial values', log.WARN);
+        // storage.set({
+          // settings: this.getInitialSettings()
+        // });
+      }
+      return false;
     });
   }
 
@@ -1182,21 +1189,7 @@ function createLoadingIndicator() {
 
 function main() {
   new PafeDelegate();
-  storage = new Storage(app.getPath('userData'));
-  // storage.getData().then((data) => {
-  //   if ('entries' in data) {
-  //     entriesData = Object.values(data.entries);
-  //   }
-  // }, err => {
-  //   if (err.code === 'ENOENT') {
-  //     // logger('[]creating storage file with initial values');
-  //     // storage.set({
-  //     //   entries: {}
-  //     // })
-  //   }
-  //   // console.error("ERROR:", err);
-  // });
-
+  storage = new Storage();
   // storage.set({
   //   settings: {
   //     passwords: {
