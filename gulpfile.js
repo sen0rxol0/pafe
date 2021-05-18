@@ -44,12 +44,12 @@ task('pack', series('build', () => {
 }));
 
 task('pack:win', series('build', () => {
-  return exec(`${__dirname}/node_modules/.bin/electron-packager ./ --platform=win32 --arch=ia32 --icon=src/assets/icon.png --prune=true --win32metadata.CompanyName="BAIEFLOW" --asar --out=build --overwrite`)
+  return exec(`${__dirname}/node_modules/.bin/electron-packager ./ --platform=win32 --arch=ia32 --icon=src/assets/icon_512x512@1x.png --prune=true --win32metadata.CompanyName="BAIEFLOW" --asar --out=build --overwrite`)
     .on('close', () => process.exit());
 }));
 
 task('pack:linux', series('build', () => {
-  return exec(`${__dirname}/node_modules/.bin/electron-packager ./ --platform=linux --arch=x64 --icon=src/assets/icon.png --prune=true --asar --out=build --overwrite`)
+  return exec(`${__dirname}/node_modules/.bin/electron-packager ./ --platform=linux --arch=x64 --icon=src/assets/icon_512x512@1x.png --prune=true --asar --out=build --overwrite`)
     .on('close', () => process.exit());
 }));
 
