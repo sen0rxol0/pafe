@@ -1,9 +1,7 @@
 # PAFE - PRIVATE SAFE
-This app is targeted for anything that needs password encryption.
+This app is targeted for anything that needs password encryption. Currently it only has support for password management.
 
 MOTO: One password to rule them all.
-
-State: early BETA
 
 ## About encryption
 PAFE encrypts using AES-256-GCM algorithm with a master key,
