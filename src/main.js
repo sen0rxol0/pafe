@@ -394,7 +394,7 @@ class SidebarItem {
     this.text = {
       padding: 4,
       attributed: gui.AttributedText.create(title, {
-        font: gui.Font.default().derive(0, 'semi-bold', 'normal'),
+        font: gui.Font.default().derive(-1, 'semi-bold', 'normal'),
         color: COLORS.textDefault,
         align: 'center',
         valign: 'center',
@@ -474,8 +474,12 @@ class DatastoreEntryShow {
   constructor(uuid) {
     this.view = appearanceBasedContainer();
     const entry = entriesData.find((entryItem) => entryItem.uuid === uuid);
-    // console.log(entry);
-    const heading = gui.Label.create('Entrada');
+    const heading = gui.Label.createWithAttributedText(gui.AttributedText.create('Entrada', {
+      font: gui.Font.default().derive(0, 'extra-bold', 'normal'),
+      align: 'center',
+      valign: 'center',
+      color: gui.Color.rgb(67,67,67)
+    }));
     const entryActionsContainer = gui.Container.create();
     const goBackBtn = gui.Button.create('Regressar');
     const editBtn = gui.Button.create('Editar');
@@ -524,7 +528,12 @@ class DatastoreEntriesAddTab {
   constructor() {
     // const uuid, title, username, email, notes, password, createTime, modifyTime, url, autotype:bool
     this.view = gui.Container.create();
-    const heading = gui.Label.create(localize(LANG, 'Adicionar uma nova entrada'));
+    const heading = gui.Label.createWithAttributedText(gui.AttributedText.create(localize(LANG, 'Adicionar uma nova entrada'), {
+      font: gui.Font.default().derive(0, 'extra-bold', 'normal'),
+      align: 'center',
+      valign: 'center',
+      color: gui.Color.rgb(67,67,67)
+    }));
     const submit = gui.Button.create(localize(LANG, 'Guardar...'));
     this.view.addChildView(heading);
     this.view.addChildView(this.createFields());
@@ -599,7 +608,7 @@ class EntriesListItem {
     this.item = item;
     this.view = gui.Container.create();
     this.text = gui.AttributedText.create(title, {
-      font: gui.Font.default().derive(4, 'bold', 'normal'),
+      font: gui.Font.default().derive(9, 'bold', 'normal'),
       valign: 'center',
       // align: 'center'
     });
@@ -661,7 +670,7 @@ class DatastoreEntriesListTab {
       entries.push(entryItem);
     }
 
-    this.entries.setStyle({ paddingLeft: 16, paddingRight: 16, flex: 1, flexDirection: 'column' });
+    this.entries.setStyle({ paddingLeft: 4, paddingRight: 4, flex: 1, flexDirection: 'column' });
     this.view.setContentSize(this.entries.getPreferredSize());
     this.view.setScrollbarPolicy('never', 'automatic');
     this.view.setContentView(this.entries);
@@ -735,7 +744,12 @@ class Setup {
   newDatastoreView() {
     const container = gui.Container.create();
     const heading = createWelcomeHeading();
-    const containerLabel = gui.Label.create(localize(LANG, 'Novo armazenamento de dados'));
+    const containerLabel = gui.Label.createWithAttributedText(gui.AttributedText.create(localize(LANG, 'Novo armazenamento de dados'), {
+      font: gui.Font.default().derive(0, 'extra-bold', 'normal'),
+      align: 'center',
+      valign: 'center',
+      color: gui.Color.rgb(67,67,67)
+    }));
     const continueButton = gui.Button.create(localize(LANG, 'Continuar...'));
     continueButton.onClick = onContinue;
     const onPassFieldChange = () => passFieldValidate();
@@ -744,8 +758,14 @@ class Setup {
     const passContainer = gui.Container.create();
     const passError = gui.Label.create('');
     const footer = gui.Container.create();
-    const footerNote = gui.Label.create(`Note: ${localize(LANG, 'Frase de acesso deve ser guardada em segredo e nunca esquecida.')}`);
-    const footerNotice = gui.Label.create(`NOTICE: ${localize(LANG, 'Criar um novo armazenamento de dados requer uma frase de acesso.')}`);
+    const footNoteText = (text) => {
+    return gui.AttributedText.create(text, {
+        font: gui.Font.default().derive(-3, 'semi-bold', 'normal'),
+        align: 'center'
+      });
+    }
+    const footerNote = gui.Label.createWithAttributedText(footNoteText(`Note: ${localize(LANG, 'Frase de acesso deve ser guardada em segredo e nunca esquecida.')}`));
+    const footerNotice = gui.Label.createWithAttributedText(footNoteText(`NOTICE: ${localize(LANG, 'Criar um novo armazenamento de dados requer uma frase de acesso.')}`));
     const passField = createField(localize(LANG, 'Frase de acesso'), 'password', {
       textChange: onPassFieldChange,
       activate: onPassFieldChange,
@@ -757,7 +777,10 @@ class Setup {
 
     function createField(title, type, on) {
       const field = gui.Container.create();
-      const label = gui.Label.create(title);
+      const label = gui.Label.createWithAttributedText(gui.AttributedText.create(title, {
+        font: gui.Font.default().derive(-3, 'medium', 'normal'),
+        align: 'start'
+      }));
       const input = gui.Entry.createType(type);
       if (Object.keys(on).length) {
         if ('textChange' in on) {
@@ -771,7 +794,6 @@ class Setup {
       field.addChildView(label);
       field.addChildView(input);
       label.setStyle({ height: 16, marginBottom: 4, color: '#888' });
-      label.setAlign('start');
       input.setStyle({ width: INPUT_WIDTH });
       field.setStyle({ flex: 1, flexDirection: 'column' });
       return field;
@@ -866,7 +888,7 @@ class Welcome {
     this.view = gui.Container.create();
     this.view.addChildView(createWelcomeHeading());
     this.view.addChildView(this.setupView());
-    this.view.addChildView(this.authenticationView());
+    // this.view.addChildView(this.authenticationView());
     this.view.setStyle({ flex: 1, flexDirection: 'column' });
     this.view.setBackgroundColor(COLORS.background);
   }
@@ -898,7 +920,10 @@ class Welcome {
 
   setupNewView() {
     const newContainer = gui.Container.create();
-    const newHeading = gui.Label.create(localize(LANG, 'Configurar nova'));
+    const newHeading = gui.Label.createWithAttributedText(gui.AttributedText.create(localize(LANG, 'Configurar nova'), {
+      font: gui.Font.default().derive(0, 'extra-bold', 'normal'),
+      color: gui.Color.rgb(67,67,67)
+    }));
     const newButton = gui.Button.create(localize(LANG, 'Crie um novo...'));
     newContainer.addChildView(newHeading);
     newContainer.addChildView(newButton);
@@ -911,10 +936,9 @@ class Welcome {
 
   setupView() {
     const setupContainer = gui.Container.create();
-    setupContainer.addChildView(this.setupSyncView());
+    // setupContainer.addChildView(this.setupSyncView());
     setupContainer.addChildView(this.setupNewView());
     setupContainer.setStyle({ padding: 16, flex: 1, flexDirection: 'row' });
-    // setupContainer.setBackgroundColor(COLORS.backgroundDarker);
     return setupContainer;
   }
 
@@ -924,7 +948,6 @@ class Welcome {
     continueBtn.onClick = this.onLogin;
     authContainer.addChildView(continueBtn);
     authContainer.setStyle({ flex: 1, alignItems: 'center' });
-    // authContainer.setBackgroundColor(COLORS.backgroundDarker);
     continueBtn.setStyle(STYLES.buttonDefaultBig);
     return authContainer;
   }
@@ -937,7 +960,12 @@ class Authentication {
   constructor() {
     this.view = gui.Container.create();
     this.loginView = this.createLoginView();
-    const heading = gui.Label.create('Login');
+    const heading = gui.Label.createWithAttributedText(gui.AttributedText.create('Login', {
+      font: gui.Font.default().derive(0, 'extra-bold', 'normal'),
+      align: 'center',
+      valign: 'center',
+      color: gui.Color.rgb(67,67,67)
+    }));
     this.view.addChildView(createWelcomeHeading());
     this.view.addChildView(heading);
     this.view.addChildView(this.loginView);
@@ -1074,6 +1102,7 @@ class PafeDelegate {
 
     if (this.checkDatastore()) {
       setContentView(this.getAuthenticationView());
+      // setContentView(this.getWelcomeView());
     } else {
       setContentView(this.getWelcomeView());
     }
@@ -1115,6 +1144,7 @@ function onDatastoreUnlock(passphrase) {
       datastore.verifyCrendentials(credentials.masterKey, passphrase)
       .then((validCredentials) => {
         if (validCredentials) {
+          log('Datastore unlocked', log.INFO);
           storage.getData().then(({entries}) => {
             datastore.decryptData(entries, credentials.masterKey)
             .then((plain) => {
@@ -1123,6 +1153,7 @@ function onDatastoreUnlock(passphrase) {
             });
           });
         } else {
+          log('Datastore login failed', log.INFO);
           reject();
         }
       });
@@ -1138,7 +1169,12 @@ function onDatastoreLock() {
 
 // Welcome to Pafe. heading, included in most views.
 function createWelcomeHeading() {
-  const heading = gui.Label.create('Welcome to Pafe.');
+  const welcome  = gui.AttributedText.create('Welcome to Pafe.', {
+    font: gui.Font.default().derive(13, 'bold', 'normal'),
+    align: 'center',
+    valign: 'center'
+  });
+  const heading = gui.Label.createWithAttributedText(welcome);
   heading.setStyle({ height: 128, color: COLORS.text });
   return heading;
 }
