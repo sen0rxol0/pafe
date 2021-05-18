@@ -1,7 +1,11 @@
+![pafe banner](https://github.com/sen0rxol0/pafe/blob/main/src/assets/banner_1024x256@1.png)
 # PAFE - PRIVATE SAFE
 This app is targeted for anything that needs password encryption. Currently it only has support for password management.
 
 MOTO: One password to rule them all.
+
+<!-- ## Predictions -->
+<!-- 1. Add support for file encryption -->
 
 ## About encryption
 PAFE encrypts using AES-256-GCM algorithm with a master key,
