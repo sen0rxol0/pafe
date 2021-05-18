@@ -7,7 +7,7 @@
 */
 
 /**
-* CHANGELOGS: 04/05/2021
+* CHANGELOGS: 18/05/2021
 */
 
 const path = require('path');
@@ -18,7 +18,6 @@ const {
   nativeImage,
   systemPreferences
 } = require('electron');
-
 const {
   Datastore,
   Storage
@@ -219,19 +218,17 @@ function appearanceBasedContainer() {
   return container;
 }
 
-class Settings {
-  constructor() {
-    this.view = appearanceBasedContainer();
-    this.view.setStyle({ flex: 1 });
-  }
-}
-
 class Imports {
   constructor() {
     this.view = appearanceBasedContainer();
     this.actionsContainer = gui.Container.create();
-    const heading = gui.Label.create(localize(LANG, 'Importar'));
-    const goBackBtn = gui.Button.create(localize(LANG, 'Cancelar'));
+    const heading = gui.Label.createWithAttributedText(gui.AttributedText.create(localize(LANG, 'Importar'), {
+        font: gui.Font.default().derive(0, 'extra-bold', 'normal'),
+        align: 'center',
+        valign: 'center',
+        color: gui.Color.rgb(67,67,67)
+    }));
+  const goBackBtn = gui.Button.create(localize(LANG, 'Cancelar'));
     const importBtn = gui.Button.create('Importar de CSV');
     importBtn.onClick = this.onImportFromFile.bind(this);
     goBackBtn.onClick = () => {
@@ -244,8 +241,9 @@ class Imports {
     this.view.addChildView(this.actionsContainer);
     heading.setStyle(STYLES.headers);
     goBackBtn.setStyle(STYLES.buttonDefaultMini);
+    goBackBtn.setBackgroundColor(gui.Color.argb(0, 0, 0,0));
     importBtn.setStyle(STYLES.buttonDefault);
-    this.actionsContainer.setStyle({ flex: 1, alignItems: 'center' });
+    this.actionsContainer.setStyle({flexDirection: 'row-reverse', justifyContent: 'space-around', alignItems: 'center' });
     this.view.setStyle({ flex: 1, flexDirection: 'column' });
   }
 
@@ -273,7 +271,6 @@ class Imports {
           const pickerCol = gui.Container.create();
           pickerCol.addChildView(col.label);
           pickerCol.addChildView(col.picker);
-
           Object.getOwnPropertyNames(item).forEach(itemName => {
             col.picker.addItem(itemName);
           });
@@ -357,378 +354,10 @@ class Imports {
   }
 }
 
-// Part of Sidebar
-function dispatchSidebarAction(dispatch) {
-  log(`Dispatching action for ${dispatch}`, log.INFO);
-  switch (dispatch) {
-    case 'credentials':
-      // setContentView(createCredentialsView());
-      break;
-    case 'generate':
-      // setContentView(createCredentialsView());
-      break;
-    case 'import':
-      setContentView(new Imports().view);
-      break;
-    case 'settings':
-      setContentView(new Settings().view);
-      break;
-    case 'lock':
-      onDatastoreLock();
-      break;
-    default:
-    break;
-  }
-}
-
-class SidebarItem {
-  constructor(title, dispatch) {
-    this.view = gui.Container.create();
-    this.view.onMouseEnter = this.onMouseEnter.bind(this);
-    this.view.onMouseLeave = this.onMouseLeave.bind(this);
-    this.view.onMouseUp = this.onMouseUp.bind(this);
-    this.view.onDraw = this.onDraw.bind(this);
-    this.hover = false;
-    this.selected = false;
-    this.dispatch = dispatch;
-    this.text = {
-      padding: 4,
-      attributed: gui.AttributedText.create(title, {
-        font: gui.Font.default().derive(-1, 'semi-bold', 'normal'),
-        color: COLORS.textDefault,
-        align: 'center',
-        valign: 'center',
-        // cursor: gui.Cursor.createWithType('hand')
-      })
-    };
-    this.view.setStyle({ width: '100%', height: ITEM_HEIGHT });
-  }
-
-  onDraw(view, painter, dirty) {
-    // const textBounds = this.text.attributed.getBoundsFor({ width: SIDEBAR_WIDTH, height: ITEM_HEIGHT });
-    const viewBounds = Object.assign({}, view.getBounds(), {x: 0, y: 0});
-    if (this.hover) {
-      painter.setFillColor(COLORS.bgHover);
-      painter.fillRect(viewBounds);
-    }
-    this.text.attributed.setColor(this.hover ? COLORS.textHover : COLORS.textDefault);
-    // const textY = (ITEM_HEIGHT - this.text.padding - textBounds.height) / 2 + this.text.padding;
-    painter.drawAttributedText(this.text.attributed, viewBounds);
-    // Icon.
-    // const iconAttributes = {
-    //   x: (props.width - props.iconSize) / 2,
-    //   y: (props.height - props.padding - item.textBounds.height - props.iconSize) / 2,
-    //   width: props.iconSize,
-    //   height: props.iconSize,
-    // };
-    // item.painter.drawImage(item.icon, iconAttributes);
-  }
-
-  onMouseEnter() {
-   this.hover = true;
-   this.view.schedulePaint();
-  };
-
-  onMouseLeave() {
-    this.hover = false;
-    this.view.schedulePaint();
-  };
-
-  onMouseUp(view, ev) {
-    if (!this.hover) return;
-    dispatchSidebarAction(this.dispatch);
-   };
-}
-
-/**
-*  Creates sidebar component used in datastore view.
-*/
-class Sidebar {
-  constructor() {
-    this.view = gui.Container.create();
-    for (const item of this.getItems()) {
-      const sidebarItem = new SidebarItem(item.title, item.dispatch);
-      // const itemIcon = gui.Image.createFromPath(path.join(__dirname, 'assets', item.icon));
-      this.view.addChildView(sidebarItem.view);
-      sidebarItems.push(sidebarItem);
-    };
-    this.view.setStyle({ flexDirection: 'column', width: SIDEBAR_WIDTH });
-  }
-
-  getItems() {
-    return [
-      // { title: localize(LANG, 'Credenciais'), dispatch: 'credentials', icon: 'credentials.png' },
-      // { title: localize(LANG, 'Gerar'), dispatch: 'generate', icon: 'generate.png' },
-      { title: localize(LANG, 'Importar'), dispatch: 'import', icon: 'import.png' },
-      { title: localize(LANG, 'Definições'), dispatch: 'settings', icon: 'settings.png' },
-      { title: localize(LANG, 'Bloquear'), dispatch: 'lock', icon: 'lock.png' },
-    ];
-  }
-}
-
-class DatastoreEntryEdit {
-
-}
-
-class DatastoreEntryShow {
-  constructor(uuid) {
-    this.view = appearanceBasedContainer();
-    const entry = entriesData.find((entryItem) => entryItem.uuid === uuid);
-    const heading = gui.Label.createWithAttributedText(gui.AttributedText.create('Entrada', {
-      font: gui.Font.default().derive(0, 'extra-bold', 'normal'),
-      align: 'center',
-      valign: 'center',
-      color: gui.Color.rgb(67,67,67)
-    }));
-    const entryActionsContainer = gui.Container.create();
-    const goBackBtn = gui.Button.create('Regressar');
-    const editBtn = gui.Button.create('Editar');
-    const removeBtn = gui.Button.create('Supprimer');
-    entryActionsContainer.addChildView(goBackBtn);
-    entryActionsContainer.addChildView(editBtn);
-    entryActionsContainer.addChildView(removeBtn);
-    goBackBtn.onClick = () => {
-      setContentView(new DatastoreView().view);
-    }
-    this.view.addChildView(heading);
-    Object.getOwnPropertyNames(entry).forEach((key, i) => {
-      if (key === 'uuid' || key === 'createdAt') {
-        return;
-      }
-      const entryContainer = gui.Container.create();
-      const entryField = entryFields.find(field => field.name == key);
-      let label = null;
-      if (entryField) {
-        label = gui.Label.create(entryField.label);
-      } else {
-        label = gui.Label.create(key);
-      }
-      const value = gui.Label.create(entry[key]);
-      entryContainer.addChildView(label);
-      entryContainer.addChildView(value);
-      this.view.addChildView(entryContainer);
-      entryContainer.setStyle({maxHeight: 32, paddingLeft: 16, paddingRight: 16, marginTop: 16, flex: 1, flexDirection: 'row', justifyContent: 'space-between'});
-      // entryContainer.setBackgroundColor(systemPreferences.getColor('control-background'));
-    });
-    this.view.addChildView(entryActionsContainer);
-    heading.setStyle(Object.assign({}, STYLES.headers, {marginBottom: 64}));
-    goBackBtn.setStyle(STYLES.buttonDefault);
-    editBtn.setStyle(STYLES.buttonDefaultMini);
-    removeBtn.setStyle(STYLES.buttonDefaultMini);
-    entryActionsContainer.setStyle({flex: 1, flexDirection: 'row', justifyContent: 'space-around'});
-    this.view.setStyle({flex: 1, flexDirection: 'column', justifyContent: 'flex-start'});
-    // this.view.setBackgroundColor(COLORS.background);
-  }
-}
-
-/**
-*  Creates Datastore entry add page in Datastore tabs.
-*/
-class DatastoreEntriesAddTab {
-  constructor() {
-    // const uuid, title, username, email, notes, password, createTime, modifyTime, url, autotype:bool
-    this.view = gui.Container.create();
-    const heading = gui.Label.createWithAttributedText(gui.AttributedText.create(localize(LANG, 'Adicionar uma nova entrada'), {
-      font: gui.Font.default().derive(0, 'extra-bold', 'normal'),
-      align: 'center',
-      valign: 'center',
-      color: gui.Color.rgb(67,67,67)
-    }));
-    const submit = gui.Button.create(localize(LANG, 'Guardar...'));
-    this.view.addChildView(heading);
-    this.view.addChildView(this.createFields());
-    this.view.addChildView(submit);
-    heading.setStyle(STYLES.headers);
-    submit.setStyle(STYLES.buttonDefaultBig);
-    this.view.setStyle({ flex: 1, flexDirection: 'column', alignItems: 'center' });
-  }
-
-  createFields() {
-    const fields = gui.Container.create();
-    const passFieldContainer = gui.Container.create();
-    const viewBtn = gui.Button.create(localize(LANG, 'Mostrar'));
-    const generateBtn = gui.Button.create(localize(LANG, 'Gerar'));
-    viewBtn.onClick = (btn) => {};
-    generateBtn.onClick = (btn) => {};
-    const passField = createField(localize(LANG, 'Palavra-passe'), 'password', {
-      textChange: () => {
-        if (passField.getText().length) {
-          // passphrase = fieldPass.getText();
-          // fieldPassView.setText(passphrase);
-        } else {
-          // passphrase = '';
-        }
-      },
-      activate: () => { }
-    });
-
-    const titleField = createField(localize(LANG, 'Título'), 'normal');
-    const siteField = createField('Site', 'normal');
-    const usernameField = createField(localize(LANG, 'Nome do usuário'), 'normal');
-
-    passFieldContainer.addChildView(passField);
-    passFieldContainer.addChildView(viewBtn);
-    passFieldContainer.addChildView(generateBtn);
-    fields.addChildView(titleField);
-    fields.addChildView(siteField);
-    fields.addChildView(usernameField);
-    fields.addChildView(passFieldContainer);
-    viewBtn.setStyle(STYLES.buttonDefaultMini);
-    generateBtn.setStyle(STYLES.buttonDefaultMini);
-    passFieldContainer.setStyle({ maxHeight: 56, flex: 1, flexDirection: 'row', alignItems: 'flex-end' });
-    fields.setStyle({ width: '100%', paddingLeft: 16, paddingRight: 16, flex: 1, flexDirection: 'column' });
-
-    function createField(title, type, on) {
-      const field = gui.Container.create();
-      const label = gui.Label.create(title);
-      const input = gui.Entry.createType(type);
-      if (on && Object.keys(on).length) {
-        if ('textChange' in on) {
-          input.onTextChange = on.textChange;
-        }
-        if ('activate' in on) {
-          input.onActivate = on.activate;
-        }
-      }
-      field.getText = () => input.getText();
-      field.addChildView(label);
-      field.addChildView(input);
-      label.setStyle({ marginBottom: 4, color: COLORS.textDefault });
-      label.setAlign('start');
-      input.setStyle({ width: '100%' });
-      field.setStyle({ maxHeight: 56, flex: 1, flexDirection: 'column' });
-      return field;
-    }
-    return fields;
-  }
-}
-
-class EntriesListItem {
-  constructor(title, item) {
-    this.item = item;
-    this.view = gui.Container.create();
-    this.text = gui.AttributedText.create(title, {
-      font: gui.Font.default().derive(9, 'bold', 'normal'),
-      valign: 'center',
-      // align: 'center'
-    });
-    this.view.onMouseEnter = this.onMouseEnter.bind(this);
-    this.view.onMouseLeave = this.onMouseLeave.bind(this);
-    this.view.onMouseUp = this.onShowEntry.bind(this);
-    this.view.onDraw = this.onDraw.bind(this);
-    this.view.setStyle({
-      width: '100%',
-      height: 64,
-      marginBottom: 16,
-      // borderRadius: 4,
-      // cursor: gui.Cursor.createWithType('hand')
-    });
-    this.hover = false;
-  }
-
-  onDraw(view, painter, dirty) {
-    const viewBounds = Object.assign({}, view.getBounds(), {x: 0, y: 0});
-    if (this.hover) {
-      painter.setFillColor(COLORS.bgHover);
-      painter.fillRect(viewBounds);
-    }
-
-    viewBounds.x = 8;
-    viewBounds.width -= 8;
-    painter.drawAttributedText(this.text, viewBounds);
-  }
-
-  onMouseEnter(view) {
-    this.hover = true;
-    this.view.schedulePaint();
-  }
-
-  onMouseLeave() {
-    this.hover = false;
-    this.view.schedulePaint();
-  }
-
-  onShowEntry() {
-    if (!this.hover) return;
-    setContentView(new DatastoreEntryShow(this.item).view);
-    // this.
-  }
-}
-
-/**
-*  Creates entry list page in datastore entries tab.
-*/
-class DatastoreEntriesListTab {
-  constructor() {
-    this.view = gui.Scroll.create();
-    this.entries = gui.Container.create();
-    this.searchView = this.entriesSearchView();
-    this.entries.addChildView(this.searchView);
-    for (const entry of this.getEntries()) {
-      const entryItem = new EntriesListItem(entry.title, entry.uuid);
-      this.entries.addChildView(entryItem.view);
-      entries.push(entryItem);
-    }
-
-    this.entries.setStyle({ paddingLeft: 4, paddingRight: 4, flex: 1, flexDirection: 'column' });
-    this.view.setContentSize(this.entries.getPreferredSize());
-    this.view.setScrollbarPolicy('never', 'automatic');
-    this.view.setContentView(this.entries);
-    // this.view.setBackgroundColor(COLORS.backgroundDarker);
-  }
-
-  onEntriesSearch() {
-
-  }
-
-  getEntries() {
-    // if (!entriesData.length) {
-      // return storage.getData().then(data => data.entries);
-    // }
-    return entriesData;
-  }
-
-  entriesSearchView() {
-    const container = gui.Container.create();
-    const search = gui.Entry.create();
-    search.onActivate = this.onEntriesSearch.bind(this);
-    container.addChildView(search);
-    container.setStyle({ marginTop: 16, marginBottom: 16 });
-    return container;
-  }
-}
-
-/**
-*  Creates activities page in datastore activity tab.
-*/
-function createDatastoreActivity() {
-  const container = gui.Container.create();
-  return container;
-}
-
-class DatastoreTabs {
-  constructor() {
-    this.view = gui.Tab.create();
-    this.view.addPage(localize(LANG, 'Entradas'), new DatastoreEntriesListTab().view);
-    // this.view.addPage(localize(LANG, 'Atividades'), createDatastoreActivity());
-    this.view.addPage(localize(LANG, 'Adicionar nova'), new DatastoreEntriesAddTab().view);
-    this.view.setStyle({ flex: 1, alignItems: 'center', color: COLORS.text });
-  }
-}
-
-/**
-*  Creates datastore view, which is composed of a sidebar and tabs.
-*/
-class DatastoreView {
+class Settings {
   constructor() {
     this.view = appearanceBasedContainer();
-    const main = gui.Container.create();
-    this.view.addChildView(new Sidebar().view);
-    main.addChildView(new DatastoreTabs().view);
-    this.view.addChildView(main);
-    main.setStyle({ flex: 1, paddingTop: 8 });
-    // main.setBackgroundColor(COLORS.background);
-    this.view.setStyle({flex: 1, flexDirection: 'row'});
+    this.view.setStyle({ flex: 1 });
   }
 }
 
@@ -880,6 +509,376 @@ class Setup {
   }
 }
 
+class SidebarItem {
+  constructor(title, dispatch) {
+    this.view = gui.Container.create();
+    this.view.onMouseEnter = this.onMouseEnter.bind(this);
+    this.view.onMouseLeave = this.onMouseLeave.bind(this);
+    this.view.onMouseUp = this.onMouseUp.bind(this);
+    this.view.onDraw = this.onDraw.bind(this);
+    this.hover = false;
+    this.selected = false;
+    this.dispatch = dispatch;
+    this.text = {
+      padding: 4,
+      attributed: gui.AttributedText.create(title, {
+        font: gui.Font.default().derive(-1, 'semi-bold', 'normal'),
+        color: COLORS.textDefault,
+        align: 'center',
+        valign: 'center',
+        // cursor: gui.Cursor.createWithType('hand')
+      })
+    };
+    this.view.setStyle({ width: '100%', height: ITEM_HEIGHT });
+  }
+
+  onDraw(view, painter, dirty) {
+    // const textBounds = this.text.attributed.getBoundsFor({ width: SIDEBAR_WIDTH, height: ITEM_HEIGHT });
+    const viewBounds = Object.assign({}, view.getBounds(), {x: 0, y: 0});
+    if (this.hover) {
+      painter.setFillColor(COLORS.bgHover);
+      painter.fillRect(viewBounds);
+    }
+    this.text.attributed.setColor(this.hover ? COLORS.textHover : COLORS.textDefault);
+    // const textY = (ITEM_HEIGHT - this.text.padding - textBounds.height) / 2 + this.text.padding;
+    painter.drawAttributedText(this.text.attributed, viewBounds);
+    // Icon.
+    // const iconAttributes = {
+    //   x: (props.width - props.iconSize) / 2,
+    //   y: (props.height - props.padding - item.textBounds.height - props.iconSize) / 2,
+    //   width: props.iconSize,
+    //   height: props.iconSize,
+    // };
+    // item.painter.drawImage(item.icon, iconAttributes);
+  }
+
+  onMouseEnter() {
+   this.hover = true;
+   this.view.schedulePaint();
+  };
+
+  onMouseLeave() {
+    this.hover = false;
+    this.view.schedulePaint();
+  };
+
+  onMouseUp(view, ev) {
+    if (!this.hover) return;
+    Sidebar.dispatchAction(this.dispatch);
+   };
+}
+/**
+*  Creates sidebar component used in datastore view.
+*/
+class Sidebar {
+  constructor() {
+    this.view = gui.Container.create();
+    for (const item of this.getItems()) {
+      const sidebarItem = new SidebarItem(item.title, item.dispatch);
+      // const itemIcon = gui.Image.createFromPath(path.join(__dirname, 'assets', item.icon));
+      this.view.addChildView(sidebarItem.view);
+      sidebarItems.push(sidebarItem);
+    };
+    this.view.setStyle({ flexDirection: 'column', width: SIDEBAR_WIDTH });
+  }
+
+  getItems() {
+    return [
+      // { title: localize(LANG, 'Credenciais'), dispatch: 'credentials', icon: 'credentials.png' },
+      // { title: localize(LANG, 'Gerar'), dispatch: 'generate', icon: 'generate.png' },
+      { title: localize(LANG, 'Importar'), dispatch: 'import', icon: 'import.png' },
+      { title: localize(LANG, 'Definições'), dispatch: 'settings', icon: 'settings.png' },
+      { title: localize(LANG, 'Bloquear'), dispatch: 'lock', icon: 'lock.png' },
+    ];
+  }
+
+  static dispatchAction(action) {
+    log(`Dispatching action for ${action}`, log.INFO);
+    switch (action) {
+      case 'credentials':
+        // setContentView(createCredentialsView());
+        break;
+      case 'generate':
+        // setContentView(createCredentialsView());
+        break;
+      case 'import':
+        setContentView(new Imports().view);
+        break;
+      case 'settings':
+        setContentView(new Settings().view);
+        break;
+      case 'lock':
+        onDatastoreLock();
+        break;
+      default:
+      break;
+    }
+  }
+}
+
+class EntriesListItem {
+  constructor(title, item) {
+    this.item = item;
+    this.view = gui.Container.create();
+    this.text = gui.AttributedText.create(title, {
+      font: gui.Font.default().derive(9, 'bold', 'normal'),
+      valign: 'center',
+      // align: 'center'
+    });
+    this.view.onMouseEnter = this.onMouseEnter.bind(this);
+    this.view.onMouseLeave = this.onMouseLeave.bind(this);
+    this.view.onMouseUp = this.onShowEntry.bind(this);
+    this.view.onDraw = this.onDraw.bind(this);
+    this.view.setStyle({
+      width: '100%',
+      height: 64,
+      marginBottom: 16,
+      // borderRadius: 4,
+      // cursor: gui.Cursor.createWithType('hand')
+    });
+    this.hover = false;
+  }
+
+  onDraw(view, painter, dirty) {
+    const viewBounds = Object.assign({}, view.getBounds(), {x: 0, y: 0});
+    if (this.hover) {
+      painter.setFillColor(COLORS.bgHover);
+      painter.fillRect(viewBounds);
+    }
+
+    viewBounds.x = 8;
+    viewBounds.width -= 8;
+    painter.drawAttributedText(this.text, viewBounds);
+  }
+
+  onMouseEnter(view) {
+    this.hover = true;
+    this.view.schedulePaint();
+  }
+
+  onMouseLeave() {
+    this.hover = false;
+    this.view.schedulePaint();
+  }
+
+  onShowEntry() {
+    if (!this.hover) return;
+    setContentView(new DatastoreEntryShow(this.item).view);
+    // this.
+  }
+}
+/**
+*  Creates entry list page in datastore entries tab.
+*/
+class DatastoreEntriesListTab {
+  constructor() {
+    this.view = gui.Scroll.create();
+    this.entries = gui.Container.create();
+    this.searchView = this.entriesSearchView();
+    this.entries.addChildView(this.searchView);
+    for (const entry of this.getEntries()) {
+      const entryItem = new EntriesListItem(entry.title, entry.uuid);
+      this.entries.addChildView(entryItem.view);
+      entries.push(entryItem);
+    }
+
+    this.entries.setStyle({ paddingLeft: 4, paddingRight: 4, flex: 1, flexDirection: 'column' });
+    this.view.setContentSize(this.entries.getPreferredSize());
+    this.view.setScrollbarPolicy('never', 'automatic');
+    this.view.setContentView(this.entries);
+    // this.view.setBackgroundColor(COLORS.backgroundDarker);
+  }
+
+  onEntriesSearch() {
+
+  }
+
+  getEntries() {
+    // if (!entriesData.length) {
+      // return storage.getData().then(data => data.entries);
+    // }
+    return entriesData;
+  }
+
+  entriesSearchView() {
+    const container = gui.Container.create();
+    const search = gui.Entry.create();
+    search.onActivate = this.onEntriesSearch.bind(this);
+    container.addChildView(search);
+    container.setStyle({ marginTop: 16, marginBottom: 16 });
+    return container;
+  }
+}
+
+/**
+*  Creates activities page in datastore activity tab.
+*/
+// function createDatastoreActivity() {
+//   const container = gui.Container.create();
+//   return container;
+// }
+
+/**
+*  Creates Datastore entry add page in Datastore tabs.
+*/
+class DatastoreEntriesAddTab {
+  constructor() {
+    // const uuid, title, username, email, notes, password, createTime, modifyTime, url, autotype:bool
+    this.view = gui.Container.create();
+    const heading = gui.Label.createWithAttributedText(gui.AttributedText.create(localize(LANG, 'Adicionar uma nova entrada'), {
+      font: gui.Font.default().derive(0, 'extra-bold', 'normal'),
+      align: 'center',
+      valign: 'center',
+      color: gui.Color.rgb(67,67,67)
+    }));
+    const submit = gui.Button.create(localize(LANG, 'Guardar...'));
+    this.view.addChildView(heading);
+    this.view.addChildView(this.createFields());
+    this.view.addChildView(submit);
+    heading.setStyle(STYLES.headers);
+    submit.setStyle(STYLES.buttonDefaultBig);
+    this.view.setStyle({ flex: 1, flexDirection: 'column', alignItems: 'center' });
+  }
+
+  createFields() {
+    const fields = gui.Container.create();
+    const passFieldContainer = gui.Container.create();
+    const viewBtn = gui.Button.create(localize(LANG, 'Mostrar'));
+    const generateBtn = gui.Button.create(localize(LANG, 'Gerar'));
+    viewBtn.onClick = (btn) => {};
+    generateBtn.onClick = (btn) => {};
+    const passField = createField(localize(LANG, 'Palavra-passe'), 'password', {
+      textChange: () => {
+        if (passField.getText().length) {
+          // passphrase = fieldPass.getText();
+          // fieldPassView.setText(passphrase);
+        } else {
+          // passphrase = '';
+        }
+      },
+      activate: () => { }
+    });
+
+    const titleField = createField(localize(LANG, 'Título'), 'normal');
+    const siteField = createField('Site', 'normal');
+    const usernameField = createField(localize(LANG, 'Nome do usuário'), 'normal');
+
+    passFieldContainer.addChildView(passField);
+    passFieldContainer.addChildView(viewBtn);
+    passFieldContainer.addChildView(generateBtn);
+    fields.addChildView(titleField);
+    fields.addChildView(siteField);
+    fields.addChildView(usernameField);
+    fields.addChildView(passFieldContainer);
+    viewBtn.setStyle(STYLES.buttonDefaultMini);
+    generateBtn.setStyle(STYLES.buttonDefaultMini);
+    passFieldContainer.setStyle({ maxHeight: 56, flex: 1, flexDirection: 'row', alignItems: 'flex-end' });
+    fields.setStyle({ width: '100%', paddingLeft: 16, paddingRight: 16, flex: 1, flexDirection: 'column' });
+
+    function createField(title, type, on) {
+      const field = gui.Container.create();
+      const label = gui.Label.create(title);
+      const input = gui.Entry.createType(type);
+      if (on && Object.keys(on).length) {
+        if ('textChange' in on) {
+          input.onTextChange = on.textChange;
+        }
+        if ('activate' in on) {
+          input.onActivate = on.activate;
+        }
+      }
+      field.getText = () => input.getText();
+      field.addChildView(label);
+      field.addChildView(input);
+      label.setStyle({ marginBottom: 4, color: COLORS.textDefault });
+      label.setAlign('start');
+      input.setStyle({ width: '100%' });
+      field.setStyle({ maxHeight: 56, flex: 1, flexDirection: 'column' });
+      return field;
+    }
+    return fields;
+  }
+}
+
+class DatastoreTabs {
+  constructor() {
+    this.view = gui.Tab.create();
+    this.view.addPage(localize(LANG, 'Entradas'), new DatastoreEntriesListTab().view);
+    // this.view.addPage(localize(LANG, 'Atividades'), createDatastoreActivity());
+    this.view.addPage(localize(LANG, 'Adicionar nova'), new DatastoreEntriesAddTab().view);
+    this.view.setStyle({ flex: 1, alignItems: 'center', color: COLORS.text });
+  }
+}
+
+class DatastoreEntryEdit {
+
+}
+
+class DatastoreEntryShow {
+  constructor(uuid) {
+    this.view = appearanceBasedContainer();
+    const entry = entriesData.find((entryItem) => entryItem.uuid === uuid);
+    const heading = gui.Label.createWithAttributedText(gui.AttributedText.create('Entrada', {
+      font: gui.Font.default().derive(0, 'extra-bold', 'normal'),
+      align: 'center',
+      valign: 'center',
+      color: gui.Color.rgb(67,67,67)
+    }));
+    const entryActionsContainer = gui.Container.create();
+    const goBackBtn = gui.Button.create('Regressar');
+    const editBtn = gui.Button.create('Editar');
+    const removeBtn = gui.Button.create('Supprimer');
+    entryActionsContainer.addChildView(goBackBtn);
+    entryActionsContainer.addChildView(editBtn);
+    entryActionsContainer.addChildView(removeBtn);
+    goBackBtn.onClick = () => {
+      setContentView(new DatastoreView().view);
+    }
+    this.view.addChildView(heading);
+    Object.getOwnPropertyNames(entry).forEach((key, i) => {
+      if (key === 'uuid' || key === 'createdAt') {
+        return;
+      }
+      const entryContainer = gui.Container.create();
+      const entryField = entryFields.find(field => field.name == key);
+      let label = null;
+      if (entryField) {
+        label = gui.Label.create(entryField.label);
+      } else {
+        label = gui.Label.create(key);
+      }
+      const value = gui.Label.create(entry[key]);
+      entryContainer.addChildView(label);
+      entryContainer.addChildView(value);
+      this.view.addChildView(entryContainer);
+      entryContainer.setStyle({maxHeight: 32, paddingLeft: 16, paddingRight: 16, marginTop: 16, flex: 1, flexDirection: 'row', justifyContent: 'space-between'});
+      // entryContainer.setBackgroundColor(systemPreferences.getColor('control-background'));
+    });
+    this.view.addChildView(entryActionsContainer);
+    heading.setStyle(Object.assign({}, STYLES.headers, {marginBottom: 64}));
+    goBackBtn.setStyle(STYLES.buttonDefault);
+    editBtn.setStyle(STYLES.buttonDefaultMini);
+    removeBtn.setStyle(STYLES.buttonDefaultMini);
+    entryActionsContainer.setStyle({flex: 1, flexDirection: 'row', justifyContent: 'space-around'});
+    this.view.setStyle({flex: 1, flexDirection: 'column', justifyContent: 'flex-start'});
+    // this.view.setBackgroundColor(COLORS.background);
+  }
+}
+/**
+*  Creates datastore view, which is composed of a sidebar and tabs.
+*/
+class DatastoreView {
+  constructor() {
+    this.view = appearanceBasedContainer();
+    const main = gui.Container.create();
+    this.view.addChildView(new Sidebar().view);
+    main.addChildView(new DatastoreTabs().view);
+    this.view.addChildView(main);
+    main.setStyle({ flex: 1, paddingTop: 8 });
+    // main.setBackgroundColor(COLORS.background);
+    this.view.setStyle({flex: 1, flexDirection: 'row'});
+  }
+}
 /**
 * Creates Welcome view, presenting datastore setup for the user.
 */
@@ -952,7 +951,6 @@ class Welcome {
     return authContainer;
   }
 }
-
 /**
 *  Creates main Authentication view
 */
