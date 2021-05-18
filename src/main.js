@@ -208,51 +208,27 @@ function localize(lang, str) {
   return localizedText.length ? localizedText : str;
 }
 
-/**
-* ==================
-*  Credentials
-*    Say YOURCompany has all sorts of passwords and informations that are often shared
-*     between members of YOURCompany, credentials allows sharing those passwords
-*     and informations as a single syncronized stack of information.
-*
-*    A credential record is keeped and shared as:
-*      CompanyName:
-*        Records:
-*          - hostname1,login1,password1,note1
-*          - hostname2,login2,password2,note2
-*
-*   Keeping track of logins, passwords, addresses, documents, etc, is still hard so
-*   Pafe Credentials helps you keeping track and sharing with ease and safety.
-* ==================
-*/
-// function createCredentialsView() {
-//   const container = gui.Container.create();
-//   const sidebar = createSidebar();
-//   const main = gui.Container.create();
-//   const header = gui.Container.create();
-//   // const backButton = gui.Button.create('Go back')
-//   const heading = gui.Label.create(localize(LANG, 'Gerenciamento de credenciais'));
-//   header.addChildView(heading);
-//   main.addChildView(header);
-//   container.addChildView(sidebar);
-//   container.addChildView(main);
-//   header.setStyle(STYLES.headers);
-//   main.setStyle({ flex: 1 });
-//   container.setStyle({ flex: 1, flexDirection: 'row'});
-//   return container;
-// }
-
+function appearanceBasedContainer() {
+  let container = gui.Container.create();
+  container.setBackgroundColor(COLORS.backgroundDarker);
+  if (process.platform === 'darwin') {
+    container = gui.Vibrant.create()
+    container.setBlendingMode('behind-window');
+    container.setMaterial('appearance-based');
+  }
+  return container;
+}
 
 class Settings {
   constructor() {
-    this.view = gui.Container.create();
+    this.view = appearanceBasedContainer();
     this.view.setStyle({ flex: 1 });
   }
 }
 
 class Imports {
   constructor() {
-    this.view = gui.Container.create();
+    this.view = appearanceBasedContainer();
     this.actionsContainer = gui.Container.create();
     const heading = gui.Label.create(localize(LANG, 'Importar'));
     const goBackBtn = gui.Button.create(localize(LANG, 'Cancelar'));
@@ -271,7 +247,6 @@ class Imports {
     importBtn.setStyle(STYLES.buttonDefault);
     this.actionsContainer.setStyle({ flex: 1, alignItems: 'center' });
     this.view.setStyle({ flex: 1, flexDirection: 'column' });
-    this.view.setBackgroundColor(COLORS.background);
   }
 
   onImportFromFile() {
@@ -470,15 +445,7 @@ class SidebarItem {
 */
 class Sidebar {
   constructor() {
-    if (process.platform === 'darwin') {
-      this.view = gui.Vibrant.create()
-      this.view.setBlendingMode('behind-window');
-      this.view.setMaterial('appearance-based');
-    } else {
-      this.view = gui.Container.create();
-      this.view.setBackgroundColor(COLORS.backgroundDarker);
-    }
-
+    this.view = gui.Container.create();
     for (const item of this.getItems()) {
       const sidebarItem = new SidebarItem(item.title, item.dispatch);
       // const itemIcon = gui.Image.createFromPath(path.join(__dirname, 'assets', item.icon));
@@ -505,7 +472,7 @@ class DatastoreEntryEdit {
 
 class DatastoreEntryShow {
   constructor(uuid) {
-    this.view = gui.Container.create();
+    this.view = appearanceBasedContainer();
     const entry = entriesData.find((entryItem) => entryItem.uuid === uuid);
     // console.log(entry);
     const heading = gui.Label.create('Entrada');
@@ -546,7 +513,7 @@ class DatastoreEntryShow {
     removeBtn.setStyle(STYLES.buttonDefaultMini);
     entryActionsContainer.setStyle({flex: 1, flexDirection: 'row', justifyContent: 'space-around'});
     this.view.setStyle({flex: 1, flexDirection: 'column', justifyContent: 'flex-start'});
-    this.view.setBackgroundColor(COLORS.background);
+    // this.view.setBackgroundColor(COLORS.background);
   }
 }
 
@@ -745,13 +712,13 @@ class DatastoreTabs {
 */
 class DatastoreView {
   constructor() {
-    this.view = gui.Container.create();
+    this.view = appearanceBasedContainer();
     const main = gui.Container.create();
     this.view.addChildView(new Sidebar().view);
     main.addChildView(new DatastoreTabs().view);
     this.view.addChildView(main);
     main.setStyle({ flex: 1, paddingTop: 8 });
-    main.setBackgroundColor(COLORS.background);
+    // main.setBackgroundColor(COLORS.background);
     this.view.setStyle({flex: 1, flexDirection: 'row'});
   }
 }
@@ -1205,3 +1172,38 @@ function main() {
 }
 
 main();
+
+/**
+*** TODOS
+* ==================
+*  Credentials
+*    Say YOURCompany has all sorts of passwords and informations that are often shared
+*     between members of YOURCompany, credentials allows sharing those passwords
+*     and informations as a single syncronized stack of information.
+*
+*    A credential record is keeped and shared as:
+*      CompanyName:
+*        Records:
+*          - hostname1,login1,password1,note1
+*          - hostname2,login2,password2,note2
+*
+*   Keeping track of logins, passwords, addresses, documents, etc, is still hard so
+*   Pafe Credentials helps you keeping track and sharing with ease and safety.
+* ==================
+*/
+// function createCredentialsView() {
+//   const container = gui.Container.create();
+//   const sidebar = createSidebar();
+//   const main = gui.Container.create();
+//   const header = gui.Container.create();
+//   // const backButton = gui.Button.create('Go back')
+//   const heading = gui.Label.create(localize(LANG, 'Gerenciamento de credenciais'));
+//   header.addChildView(heading);
+//   main.addChildView(header);
+//   container.addChildView(sidebar);
+//   container.addChildView(main);
+//   header.setStyle(STYLES.headers);
+//   main.setStyle({ flex: 1 });
+//   container.setStyle({ flex: 1, flexDirection: 'row'});
+//   return container;
+// }

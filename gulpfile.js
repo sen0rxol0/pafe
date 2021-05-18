@@ -16,10 +16,12 @@ task('js', resolve => {
 
 task('watch', async () => {
   // watch(`${__dirname}/assets/**/*.{jpg,jpeg,png,svg,gif}`, task('assets'));
-  watch(`${__dirname}/src/**/*.{js}`, resolve => {
+  watch(`${__dirname}/src/**/*.js`, resolve => {
     if (typeof electron === null) { resolve(); }
     else {
+      console.log(`Killing electron`);
       electron.kill();
+      console.log(`Respawning electron at ${__dirname}`);
       const respawn = spawn('npx', ['electron', `${__dirname}`]);
       // respawn.on('close', () => process.exit());
       electron = respawn;
@@ -30,11 +32,10 @@ task('watch', async () => {
 
 task('build', parallel('assets', 'js'));
 task('start', series('build', resolve => {
-  setTimeout(() => {
+    console.log(`Spawning electron at ${__dirname}`);
     electron = spawn('npx', ['electron', `${__dirname}`]);
     // electron.on('close', () => process.exit());
     resolve();
-  }, 2000);
 }));
 
 task('pack', series('build', () => {
