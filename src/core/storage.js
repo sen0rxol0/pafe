@@ -21,7 +21,7 @@ function getStorageDir() {
         return path.join(os.homedir(), 'AppData', 'Local', productName, 'User Data');
       }
     default:
-     throw new Error('Platform not recognized');
+     throw new Error('Platform not recognized.');
   }
 }
 

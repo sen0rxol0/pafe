@@ -7,7 +7,7 @@
 */
 
 /**
-* CHANGELOGS: 18/05/2021
+* CHANGELOGS: 20/05/2021
 */
 
 const path = require('path');
@@ -171,6 +171,10 @@ const STYLES = {
     marginTop: 16,
     marginBottom: 16
   },
+  buttonDefaultIcon: {
+    width: BUTTON_WIDTH / 4,
+    color: COLORS.textDefault
+  },
   // buttonBgPrimary: '#d4d4d4',
   errorLabel: {
     width: '80%',
@@ -217,7 +221,9 @@ function appearanceBasedContainer() {
   }
   return container;
 }
-
+/**
+*  Creates imports view.
+*/
 class Imports {
   constructor() {
     this.view = appearanceBasedContainer();
@@ -228,7 +234,9 @@ class Imports {
         valign: 'center',
         color: gui.Color.rgb(67,67,67)
     }));
-  const goBackBtn = gui.Button.create(localize(LANG, 'Cancelar'));
+    const goBackBtn = gui.Button.create(localize(LANG, 'Cancelar'));
+    const goBackBtnIcon = gui.Image.createFromPath(path.join(__dirname, 'assets', 'back.png'));
+    goBackBtn.setImage(goBackBtnIcon);
     const importBtn = gui.Button.create('Importar de CSV');
     importBtn.onClick = this.onImportFromFile.bind(this);
     goBackBtn.onClick = () => {
@@ -240,8 +248,8 @@ class Imports {
     this.view.addChildView(heading);
     this.view.addChildView(this.actionsContainer);
     heading.setStyle(STYLES.headers);
-    goBackBtn.setStyle(STYLES.buttonDefaultMini);
-    goBackBtn.setBackgroundColor(gui.Color.argb(0, 0, 0,0));
+    goBackBtn.setStyle(STYLES.buttonDefaultIcon);
+    // goBackBtn.setBackgroundColor(gui.Color.argb(0, 0, 0,0));
     importBtn.setStyle(STYLES.buttonDefault);
     this.actionsContainer.setStyle({flexDirection: 'row-reverse', justifyContent: 'space-around', alignItems: 'center' });
     this.view.setStyle({ flex: 1, flexDirection: 'column' });
@@ -353,14 +361,18 @@ class Imports {
     return entry;
   }
 }
-
+/**
+*  Creates settings view.
+*/
 class Settings {
   constructor() {
     this.view = appearanceBasedContainer();
     this.view.setStyle({ flex: 1 });
   }
 }
-
+/**
+*  Creates setup view.
+*/
 class Setup {
   constructor(type) {
     if (type === 'newDatastore') {
@@ -508,7 +520,9 @@ class Setup {
     return container;
   }
 }
-
+/**
+*  Creates sidebar item view.
+*/
 class SidebarItem {
   constructor(title, dispatch) {
     this.view = gui.Container.create();
@@ -615,7 +629,9 @@ class Sidebar {
     }
   }
 }
-
+/**
+*  Creates entry list item view.
+*/
 class EntriesListItem {
   constructor(title, item) {
     this.item = item;
@@ -668,7 +684,7 @@ class EntriesListItem {
   }
 }
 /**
-*  Creates entry list page in datastore entries tab.
+*  Creates datastore entry list tab view.
 */
 class DatastoreEntriesListTab {
   constructor() {
@@ -719,7 +735,7 @@ class DatastoreEntriesListTab {
 // }
 
 /**
-*  Creates Datastore entry add page in Datastore tabs.
+*  Creates datastore tabs entry add tab view.
 */
 class DatastoreEntriesAddTab {
   constructor() {
@@ -777,7 +793,10 @@ class DatastoreEntriesAddTab {
 
     function createField(title, type, on) {
       const field = gui.Container.create();
-      const label = gui.Label.create(title);
+      const label = gui.Label.createWithAttributedText(gui.AttributedText.create(title, {
+        font: gui.Font.default().derive(-3, 'medium', 'normal'),
+        align: 'start'
+      }));
       const input = gui.Entry.createType(type);
       if (on && Object.keys(on).length) {
         if ('textChange' in on) {
@@ -799,7 +818,9 @@ class DatastoreEntriesAddTab {
     return fields;
   }
 }
-
+/**
+*  Creates datastore tabs view.
+*/
 class DatastoreTabs {
   constructor() {
     this.view = gui.Tab.create();
@@ -809,11 +830,96 @@ class DatastoreTabs {
     this.view.setStyle({ flex: 1, alignItems: 'center', color: COLORS.text });
   }
 }
-
+/**
+*  Creates datastore entry edit view.
+*/
 class DatastoreEntryEdit {
+  constructor() {
+    // const uuid, title, username, email, notes, password, createTime, modifyTime, url, autotype:bool
+    this.view = appearanceBasedContainer();
+    const heading = gui.Label.createWithAttributedText(gui.AttributedText.create(localize(LANG, 'Adicionar uma nova entrada'), {
+      font: gui.Font.default().derive(0, 'extra-bold', 'normal'),
+      align: 'center',
+      valign: 'center',
+      color: gui.Color.rgb(67,67,67)
+    }));
+    const submit = gui.Button.create(localize(LANG, 'Guardar...'));
+    const goBackBtn = gui.Button.create('Regressar');
+    const goBackBtnIcon = gui.Image.createFromPath(path.join(__dirname, 'assets', 'back.png'));
+    goBackBtn.setImage(goBackBtnIcon);
+    this.view.addChildView(heading);
+    this.view.addChildView(this.createFields());
+    this.view.addChildView(goBackBtn);
+    this.view.addChildView(submit);
+    heading.setStyle(STYLES.headers);
+    submit.setStyle(STYLES.buttonDefaultBig);
+    this.view.setStyle({ flex: 1, flexDirection: 'column', alignItems: 'center' });
+  }
 
+  createFields() {
+    const fields = gui.Container.create();
+    const passFieldContainer = gui.Container.create();
+    const viewBtn = gui.Button.create(localize(LANG, 'Mostrar'));
+    const generateBtn = gui.Button.create(localize(LANG, 'Gerar'));
+    viewBtn.onClick = (btn) => {};
+    generateBtn.onClick = (btn) => {};
+    const passField = createField(localize(LANG, 'Palavra-passe'), 'password', {
+      textChange: () => {
+        if (passField.getText().length) {
+          // passphrase = fieldPass.getText();
+          // fieldPassView.setText(passphrase);
+        } else {
+          // passphrase = '';
+        }
+      },
+      activate: () => { }
+    });
+
+    const titleField = createField(localize(LANG, 'Título'), 'normal');
+    const siteField = createField('Site', 'normal');
+    const usernameField = createField(localize(LANG, 'Nome do usuário'), 'normal');
+    passFieldContainer.addChildView(passField);
+    passFieldContainer.addChildView(viewBtn);
+    passFieldContainer.addChildView(generateBtn);
+    fields.addChildView(titleField);
+    fields.addChildView(siteField);
+    fields.addChildView(usernameField);
+    fields.addChildView(passFieldContainer);
+    viewBtn.setStyle(STYLES.buttonDefaultMini);
+    generateBtn.setStyle(STYLES.buttonDefaultMini);
+    passFieldContainer.setStyle({ maxHeight: 56, flex: 1, flexDirection: 'row', alignItems: 'flex-end' });
+    fields.setStyle({ width: '100%', paddingLeft: 16, paddingRight: 16, flex: 1, flexDirection: 'column' });
+
+    function createField(title, type, on) {
+      const field = gui.Container.create();
+      const label = gui.Label.createWithAttributedText(gui.AttributedText.create(title, {
+        font: gui.Font.default().derive(-3, 'medium', 'normal'),
+        align: 'start'
+      }));
+      const input = gui.Entry.createType(type);
+      if (on && Object.keys(on).length) {
+        if ('textChange' in on) {
+          input.onTextChange = on.textChange;
+        }
+        if ('activate' in on) {
+          input.onActivate = on.activate;
+        }
+      }
+      field.getText = () => input.getText();
+      field.addChildView(label);
+      field.addChildView(input);
+      label.setStyle({ marginBottom: 4, color: COLORS.textDefault });
+      label.setAlign('start');
+      input.setStyle({ width: '100%' });
+      field.setStyle({ maxHeight: 56, flex: 1, flexDirection: 'column' });
+      return field;
+    }
+    return fields;
+  }
 }
-
+/**
+*  Creates datastore entry show view.
+*/
 class DatastoreEntryShow {
   constructor(uuid) {
     this.view = appearanceBasedContainer();
@@ -826,6 +932,8 @@ class DatastoreEntryShow {
     }));
     const entryActionsContainer = gui.Container.create();
     const goBackBtn = gui.Button.create('Regressar');
+    const goBackBtnIcon = gui.Image.createFromPath(path.join(__dirname, 'assets', 'back.png'));
+    goBackBtn.setImage(goBackBtnIcon);
     const editBtn = gui.Button.create('Editar');
     const removeBtn = gui.Button.create('Supprimer');
     entryActionsContainer.addChildView(goBackBtn);
@@ -834,6 +942,9 @@ class DatastoreEntryShow {
     goBackBtn.onClick = () => {
       setContentView(new DatastoreView().view);
     }
+    editBtn.onClick = () => {
+      setContentView(new DatastoreEntryEdit().view);
+    }
     this.view.addChildView(heading);
     Object.getOwnPropertyNames(entry).forEach((key, i) => {
       if (key === 'uuid' || key === 'createdAt') {
@@ -841,12 +952,14 @@ class DatastoreEntryShow {
       }
       const entryContainer = gui.Container.create();
       const entryField = entryFields.find(field => field.name == key);
-      let label = null;
-      if (entryField) {
-        label = gui.Label.create(entryField.label);
-      } else {
-        label = gui.Label.create(key);
-      }
+      let title = entryField ? entryField.label : key;
+      const attributedText = gui.AttributedText.create(title, {
+        font: gui.Font.default().derive(-1, 'semi-bold', 'normal'),
+        color: COLORS.textDefault,
+        align: 'center',
+        valign: 'center'
+      });
+      const label = gui.Label.createWithAttributedText(attributedText);
       const value = gui.Label.create(entry[key]);
       entryContainer.addChildView(label);
       entryContainer.addChildView(value);
@@ -856,7 +969,7 @@ class DatastoreEntryShow {
     });
     this.view.addChildView(entryActionsContainer);
     heading.setStyle(Object.assign({}, STYLES.headers, {marginBottom: 64}));
-    goBackBtn.setStyle(STYLES.buttonDefault);
+    goBackBtn.setStyle(STYLES.buttonDefaultIcon);
     editBtn.setStyle(STYLES.buttonDefaultMini);
     removeBtn.setStyle(STYLES.buttonDefaultMini);
     entryActionsContainer.setStyle({flex: 1, flexDirection: 'row', justifyContent: 'space-around'});
