@@ -1,5 +1,5 @@
 const { strToUint8Array, hexToArrayBuffer, arrayBufferToHex } = require('../util/common');
-
+const crypto = window.crypto;
 const AES = 'AES-GCM';
 const PBKDF2 = 'PBKDF2';
 /**
@@ -15,7 +15,6 @@ async function deriveKey(
   iterations = 100000, //=1e6
   salt
 ) {
-  const crypto = window.crypto;
   const importKeyOpts = ['raw', strToUint8Array(rawKey), { name: PBKDF2 }, false, ['deriveKey']]
   const masterKey = await crypto.subtle.importKey(...importKeyOpts);
 
@@ -80,7 +79,6 @@ async function verifyRaw(
 }
 
 async function extractKey(encodedKey) {
-  const crypto = window.crypto;
   const keyBuffer = hexToArrayBuffer(encodedKey.slice(64));
   const importKeyOpts = ['raw', keyBuffer, {name: AES}, true, ['encrypt', 'decrypt']];
   const key = await crypto.subtle.importKey(...importKeyOpts);
