@@ -699,7 +699,7 @@ class DatastoreEntriesListTab {
       this.entries.addChildView(entryItem.view);
       entries.push(entryItem);
     }
-
+    this.entries.addChildView(gui.Label.create(`${entries.length} ${localize(LANG, 'Entradas')}`));
     this.entries.setStyle({ paddingLeft: 4, paddingRight: 4, flex: 1, flexDirection: 'column' });
     this.view.setContentSize(this.entries.getPreferredSize());
     this.view.setScrollbarPolicy('never', 'automatic');
@@ -772,17 +772,18 @@ class DatastoreEntriesAddTab {
   }
 
   onViewPassField(btn) {
-    let defaultTitle = localize(LANG, 'Mostrar');
+    const defaultTitle = localize(LANG, 'Mostrar'),
+    currentValue = this.passFieldContainer.childAt(0).childAt(1).getText();
     if (btn.getTitle() == defaultTitle) {
-      activeFields.passFieldNormal.childAt(1).setText(activeFields.passField.childAt(1).getText());
       this.passFieldContainer.removeChildView(this.passFieldContainer.childAt(0));
       this.passFieldContainer.addChildViewAt(activeFields.passFieldNormal, 0);
+      btn.setTitle('Cacher');
     } else {
-      activeFields.passField.childAt(1).setText(activeFields.passFieldNormal.childAt(1).getText());
       this.passFieldContainer.removeChildView(this.passFieldContainer.childAt(0));
       this.passFieldContainer.addChildViewAt(activeFields.passField, 0);
+      btn.setTitle(defaultTitle);
     }
-    btn.setTitle(btn.getTitle() == defaultTitle ? 'Cacher' : defaultTitle);
+    this.passFieldContainer.childAt(0).childAt(1).setText(currentValue);
   };
 
   createFields() {
