@@ -1,4 +1,3 @@
-const PassGenerator = require('./PassGenerator');
 const Storage = require('./storage');
 
 class PafeDatastore {
@@ -43,7 +42,12 @@ class PafeDatastore {
   }
 
   generatePassphrase(length = 12, type = 'alphanum') {
-    return PassGenerator.alphaNumeric(length);
+    return new Promise((resolve, reject) => {
+      this.webContents.executeJavaScript(`
+        // window.cryptoAPI.generator.alphaNumeric(${length});
+        window.cryptoAPI.generator.ascii(${length});
+      `).then(resolve);
+    });
   }
 }
 

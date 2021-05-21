@@ -1,12 +1,14 @@
 /**
  * Random password generator.
- * Copyright (c) 2018, Walter B. Varela
+ * Copyright (c) 2018
  */
-module.exports = class PassGenerator {
+
+class Generator {
   static ascii_lowercase = 'abcdefghijklmnopqrstuvwxyz';
   static ascii_uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   static digits = '0123456789';
-  static symbols = '!"#$%^&@*\'()+_,-.`{|}[\\]:;/?<=>~';
+  static symbols = '!@#$%^*()_+{}:?|,[];./~';
+  // static symbols = '!"#$%^&@*\'()+_,-.`{|}[\\]:;/?<=>~';
   // static similarCharacters = /[ilLI|`oO0]/g;
   // static strictRules = [
   //   { name: 'ascii_lowercase', rule: /[a-z]/ },
@@ -44,7 +46,7 @@ module.exports = class PassGenerator {
    * @param {Integer} length
    */
   static ascii(length = 16) {
-    const chars = [this.ascii_uppercase, this.ascii_lowercase, this.symbols, this.digits];
+    const chars = `${this.ascii_uppercase}${this.ascii_lowercase}${this.symbols}${this.digits}`;
     return this.genCharacters(chars, length);
   }
 
@@ -53,7 +55,7 @@ module.exports = class PassGenerator {
    * @param {Integer} length
    */
   static alphaNumeric(length = 16) {
-    const alphanum = [this.ascii_uppercase, this.ascii_lowercase, this.digits];
+    const alphanum = `${this.ascii_uppercase}${this.ascii_lowercase}${this.digits}`;
     return this.genCharacters(alphanum, length);
   }
 
@@ -62,7 +64,7 @@ module.exports = class PassGenerator {
    * @param {Integer} length
    */
   static hex(length = 16) {
-    const hexChars = [this.digits, this.ascii_uppercase.slice(0, 6)];
+    const hexChars = `${this.digits}${this.ascii_uppercase.slice(0, 6)}`;
     return this.genCharacters(hexChars, length);
   }
 
@@ -72,10 +74,12 @@ module.exports = class PassGenerator {
    * @returns {Uint8Array} Random byte array
    */
   static randomBytes(length) {
-    const buf = new Uint8Array(length);
-    // window.crypto.getRandomValues(buf);
-    const bytes = require('crypto').randomBytes(buf.length);
-    buf.set(bytes);
+    let buf = new Uint8Array(length);
+    if (window.crypto && window.crypto.getRandomValues) {
+      window.crypto.getRandomValues(buf);
+    }
     return buf;
   }
 }
+
+module.exports = Generator;

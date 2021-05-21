@@ -768,7 +768,9 @@ class DatastoreEntriesAddTab {
   }
 
   onGeneratePassField(btn) {
-
+    datastore.generatePassphrase().then(gen => {
+      this.passFieldContainer.childAt(0).childAt(1).setText(gen);
+    });
   }
 
   onViewPassField(btn) {
@@ -1202,25 +1204,12 @@ class PafeDelegate {
       datastore = new Datastore(cryptoWin.webContents);
     });
     // cryptoWin.webContents.openDevTools();
-
     // cryptoWin.webContents.on('did-finish-load', () => {
-    //   datastore = new Datastore(cryptoWin.webContents);
-    //   // datastore.deriveMasterKey('Seguro@myFPasswordIsb1gL0n6')
-    //   // .then((key) => {
-    //   //   // datastore.verifyCrendentials(key, 'Seguro@myFPasswordIsb1gL0n6')
-    //   //   // .then((valid) => {
-    //   //   //   console.log('crendentials valid:', valid);
-    //   //   // })
-    //   //
-    //   //   storage.getData().then(data => {
-    //   //     datastore.encryptData(JSON.stringify(data.entries), key).then((encrypted) => {
-    //   //       console.log(encrypted);
-    //   //       datastore.decryptData(encrypted, key).then((plain) => {
-    //   //         console.log(JSON.parse(plain));
-    //   //       });
-    //   //     });
-    //   //   });
-    //   // })
+    //   cryptoWin.webContents.executeJavaScript(`
+    //     window.cryptoAPI.generator.alphaNumeric(12);
+    //   `).then((res) => {
+    //     console.log(res);
+    //   });
     // });
   }
 
