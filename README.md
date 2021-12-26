@@ -7,16 +7,11 @@ It might be used for other things that needs password protection and or encrypti
 <!-- 1. Add support for file encryption -->
 
 ## About encryption
-PAFE encrypts using AES-256-GCM algorithm with a master key,
-which is derived using PBKDF2 algorithm from the master password.
-
-## About setup
-Install node dependencies (using either `yarn` or `npm`):
-The development files are under the `src` directory, `main.js` is the project entrypoint.
+PAFE encrypts using AES-256-GCM encryption algorithm, with a master key,
+which is derived from the PBKDF2 algorithm function and the master password.
 
 ## Thanks
 Thanks to [ElectronJS](https://github.com/electron/electron) and [Yue](https://github.com/yue/yue)
-
 ## About license
 - [MIT](https://github.com/sen0rxol0/pafe/blob/main/LICENCE)
 - Electron is licenced under [MIT](https://github.com/electron/electron/blob/master/LICENSE)
