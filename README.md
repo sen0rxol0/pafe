@@ -1,8 +1,7 @@
-![pafe banner](https://github.com/sen0rxol0/pafe/blob/main/src/assets/banner_1024x256.png)
+<!-- ![pafe banner](https://github.com/sen0rxol0/pafe/blob/main/src/assets/banner_1024x256.png) -->
 # PAFE - PRIVATE SAFE
-This app is targeted for anything that needs password encryption. Currently it only has support for password management.
-
-MOTO: One password to rule them all.
+PAFE is a descentralized password management application.
+It might be used for other things that needs password protection and or encryption.
 
 <!-- ## Predictions -->
 <!-- 1. Add support for file encryption -->
