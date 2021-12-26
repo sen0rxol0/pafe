@@ -15,6 +15,14 @@ Cross-platform on the desktop, not available on mobile as of yet but eventualy P
 ## About encryption
     PAFE encrypts using AES-256-GCM encryption algorithm, with a master key,
     which is derived from the PBKDF2 algorithm function and the master password.
+<details>
+<br/>
+AES-256-GCM (Advanced Encryption Standard in Galois/Counter Mode)<br/>
+Meaning the data is encrypted with a 256 bit key, generated for encryption using AES in GCM mode.
+<br/><br/>
+<a href="https://fr.wikipedia.org/wiki/PBKDF2">PBKDF2 (Password-Based Key Derivation Function 2)</a>
+<br/><br/>
+</details>
 
 ## About license
 - [MIT](https://github.com/sen0rxol0/pafe/blob/main/LICENCE)
