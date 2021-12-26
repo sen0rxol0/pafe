@@ -29,21 +29,6 @@ const {
   readFromCSV,
 } = require('./util/');
 
-// buttonStyles = { // more at https://libyue.com/docs/latest/js/api/button_style.html
-//   circular: 'circular', // circle
-//   roundRect: 'round-rect',
-//   incline: 'inline',
-//   recessed: 'recessed',
-//   rounded: 'rounded',
-//   texturedRounded: 'textured-rounded',
-//   squareRegular: 'regular-square',
-//   squareThicker: 'thicker-square',
-//   squareThick: 'thick-square',
-//   squareShadowless: 'shadowless-square',
-//   squareTextured: 'textured-square',
-//   squareSmall: 'small-square'
-// }
-
 process.on('uncaughtException', (error) => {
   console.error(error);
 });
@@ -69,6 +54,15 @@ global.entriesData = [];
 // }];
 global.entryFields = [
   {
+    name: 'type',
+    label: 'Type',
+    types: {
+      password: 'Password',
+      generic: 'Generic',
+      card: 'Card'
+    }
+  },
+  {
     name: 'title',
     label: 'Title',
     field: 'text'
@@ -92,15 +86,6 @@ global.entryFields = [
     name: 'notes',
     label: 'Notes',
     field: 'textedit'
-  },
-  {
-    name: 'type',
-    label: 'Type',
-    types: {
-      password: 'Password',
-      generic: 'Generic',
-      card: 'Card'
-    }
   }
 ];
 // global.currentFormFields = {};

@@ -1,4 +1,4 @@
-<!-- ![pafe banner](https://github.com/sen0rxol0/pafe/blob/main/src/assets/banner_1024x256.png) -->
+![pafe banner](https://github.com/sen0rxol0/pafe/blob/main/src/assets/banner_1024x256@1x.png)
 # PAFE - PRIVATE SAFE
 PAFE is a [descentralized](https://en.wikipedia.org/wiki/Decentralized_web) password management application.
 It might be of use for, anything that needs password protection and or encryption.

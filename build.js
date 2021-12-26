@@ -38,6 +38,18 @@ function packLinux() {
   }).catch(onExecCatch);
 }
 
+function packWin() {
+  return downloadYue('win_x64').then(() => {
+    // execCmd('npx gulp pack:win').then(() => {
+    //   execCmd(`zip -rq pafe-v${VERSION}-win.zip ./build/Pafe-darwin-x64/Pafe.app && rm -r build`)
+    //   .then(() => {
+    //     console.log('build for win platform is complete.');
+    //     process.exit(0);
+    //   });
+    // });
+  }, onExecCatch);
+}
+
 function downloadYue(platform) {
   const yueDownloadUrl = `https://github.com/yue/yue/releases/download/${yueTagName}/node_yue_electron_${ever}_${yueTagName}_${platform}.zip`;
   const zipFile = `gui_electron_${platform}.zip`;
@@ -46,21 +58,13 @@ function downloadYue(platform) {
 
 packDarwin().then(() => {
   console.log('build for mac platform is complete.\n');
-  packLinux().then(() => {
-    console.log('build for linux platform is complete.\n');
-    downloadYue('mac_x64');
-  }).catch(onExecCatch);
+  // packLinux().then(() => {
+  //   console.log('build for linux platform is complete.\n');
+  //   downloadYue('mac_x64');
+  // }).catch(onExecCatch);
 }).catch(onExecCatch);
 
 // execCmd('curl https://api.github.com/repos/yue/yue/releases/latest > yue_releases.json').then(() => {
 //   // const tagName = JSON.parse(res).tag_name;
 //   // console.log(tagName);
 // }).catch(onExecCatch);
-
-// execCmd('npx gulp pack:win').then(() => {
-//   execCmd(`zip -rq pafe-v${VERSION}-win.zip ./build/Pafe-darwin-x64/Pafe.app && rm -r build`)
-//   .then(() => {
-//     console.log('build for win platform is complete.');
-//     process.exit(0);
-//   });
-// });
