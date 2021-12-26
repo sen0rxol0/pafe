@@ -5,9 +5,9 @@
 
 const { exec } = require('child_process');
 const VERSION = require('./package.json').version;
-const onExecCatch = (err) => console.error(`${err}\n`);
-const electronVersion = '16';
+const ever = '16';
 const yueTagName = 'v0.10.1';
+const onExecCatch = (err) => console.error(`${err}\n`);
 
 function execCmd(cmd) {
   return new Promise((resolve, reject) => {
@@ -20,12 +20,6 @@ function execCmd(cmd) {
       resolve(stdout);
     });
   });
-}
-
-function downloadYue(platform) {
-  const yueDownloadUrl = `https://github.com/yue/yue/releases/download/${yueTagName}/node_yue_electron_${electronVersion}_${yueTagName}_${platform}.zip`;
-  const filename = `gui_electron_${platform}.zip`;
-  return execCmd(`wget -q -O ${filename} ${yueDownloadUrl}; unzip -o ${filename} -x LICENSE; rm ${filename}`);
 }
 
 function packDarwin() {
@@ -42,6 +36,12 @@ function packLinux() {
       return execCmd(`cd build/Pafe-linux-x64/ && zip -rq -9 pafe-v${VERSION}-linux.zip ./`);
     }).catch(onExecCatch);
   }).catch(onExecCatch);
+}
+
+function downloadYue(platform) {
+  const yueDownloadUrl = `https://github.com/yue/yue/releases/download/${yueTagName}/node_yue_electron_${ever}_${yueTagName}_${platform}.zip`;
+  const zipFile = `gui_electron_${platform}.zip`;
+  return execCmd(`wget -q -O ${zipFile} ${yueDownloadUrl}; unzip -o ${zipFile} -x LICENSE; rm ${zipFile}`);
 }
 
 packDarwin().then(() => {
