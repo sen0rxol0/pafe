@@ -6,7 +6,7 @@ It might be of use for, anything that needs password protection and or encryptio
 <!-- ## Predictions -->
 <!-- 1. Add support for file encryption -->
 ## Availability
-Cross-platform on the desktop, not available on mobile as of yet but eventualy Pafe will be available on the mobile as a PWA. 
+Cross-platform on the desktop, not available on mobile as of yet but eventually Pafe will be made available on the mobile. 
 
 - Windows
 - macOS
