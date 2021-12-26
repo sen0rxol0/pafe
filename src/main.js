@@ -7,7 +7,7 @@
 */
 
 /**
-* CHANGELOGS: 20/05/2021
+* CHANGELOGS: 22/05/2021
 */
 
 const path = require('path');
@@ -91,7 +91,7 @@ global.entryFields = [
   {
     name: 'notes',
     label: 'Notes',
-    field: 'text'
+    field: 'textedit'
   },
   {
     name: 'type',
@@ -109,6 +109,7 @@ global.sidebarItems = [];
 global.loginAttemptCount = 0;
 // global.credentials = {}
 // global.settings = {}
+global.ka = []; //KEEP ALIVE
 
 // SIZES
 const WINDOW_WIDTH = 640;
@@ -196,7 +197,7 @@ const STYLES = {
 };
 
 // LANGUAGES
-const LANG = app.getLocaleCountryCode().toLowerCase(); // fr,pt,es,en
+const LANG = app.getLocaleCountryCode().toLowerCase(); // fr,pt,es,en supported
 const LOCALES = getDefaultLocales();
 function localize(lang, str) {
   let localizedText = '';
@@ -584,7 +585,7 @@ class SidebarItem {
    };
 }
 /**
-*  Creates sidebar component used in datastore view.
+*  Creates sidebar view used in datastore view.
 */
 class Sidebar {
   constructor() {
@@ -632,9 +633,166 @@ class Sidebar {
   }
 }
 /**
+*  Creates activities page in datastore activity tab.
+*/
+// function createDatastoreActivity() {
+//   const container = gui.Container.create();
+//   return container;
+// }
+/**
+*  Creates datastore entry resource,
+*  which is either a form for editing or creating a entry.
+*/
+class DatastoreEntryResource {
+  constructor(entryItem = null) {
+    // const uuid, title, username, email, notes, password, createTime, modifyTime, url, autotype:bool
+    this.createFields();
+    this.view = gui.Container.create();
+    const heading = gui.Label.createWithAttributedText(gui.AttributedText.create(localize(LANG, 'Adicionar uma nova entrada'), {
+      font: gui.Font.default().derive(0, 'extra-bold', 'normal'),
+      align: 'center',
+      valign: 'center',
+      color: gui.Color.rgb(67,67,67)
+    }));
+    this.submitBtn = gui.Button.create(localize(LANG, 'Guardar...'));
+    this.submitBtn.onClick = this.onSubmitEntry.bind(this);
+    this.view.addChildView(heading);
+    this.view.addChildView(this.fieldsContainer);
+    this.view.addChildView(this.submitBtn);
+    heading.setStyle(STYLES.headers);
+    this.submitBtn.setStyle(STYLES.buttonDefaultBig);
+    this.view.setStyle({ paddingBottom: 24, flex: 1, flexDirection: 'column', alignItems: 'center' });
+    // console.log(entryItem);
+    if (entryItem !== null) {
+      // console.log(activeFields);
+      this.fieldsContainer.childAt(0).childAt(1).setText(entryItem.title);
+      this.fieldsContainer.childAt(1).childAt(1).setText(entryItem.siteURL);
+      this.fieldsContainer.childAt(2).childAt(1).setText(entryItem.username);
+      this.fieldsContainer.childAt(3).childAt(0).childAt(1).setText(entryItem.password);
+      const cancelBtn = gui.Button.create(localize(LANG, 'Cancelar'));
+      cancelBtn.setStyle(STYLES.buttonDefaultMini);
+      cancelBtn.onClick = () => {
+        setContentView(new DatastoreView().view);
+      }
+      this.view.addChildView(cancelBtn);
+    }
+  }
+
+  onSubmitEntry() {
+    // console.log(activeFields);
+    // console.log(this.fields.titleField.getEntry().getText());
+    // console.log(this.fields.usernameField.getEntry().getText());
+    // console.log(this.fields.passField.getEntry().getText());
+  }
+
+  onGeneratePassField(btn) {
+    datastore.generatePassphrase().then(gen => {
+      this.passFieldContainer.childAt(0).childAt(1).setText(gen);
+    });
+  }
+
+  onViewPassField(btn) {
+    const defaultTitle = localize(LANG, 'Mostrar'),
+    currentValue = this.passFieldContainer.childAt(0).childAt(1).getText();
+    if (btn.getTitle() == defaultTitle) {
+      // this.passFieldContainer.childAt(0).removeChildView(activeFields.pass.childAt(1));
+      // this.passFieldContainer.childAt(0).addChildViewAt(activeFields.passNormal.childAt(1), 1);
+      // activeFields.passNormal.childAt(1).setText(currentValue);
+      // this.passFieldContainer.addChildViewAt(activeFields.passNormal, 0);
+      btn.setTitle('Cacher');
+    } else {
+      // this.passFieldContainer.childAt(0).removeChildView(activeFields.passNormal.childAt(1));
+      // this.passFieldContainer.childAt(0).addChildViewAt(activeFields.pass.childAt(1), 1);
+      // activeFields.pass.childAt(1).setText(currentValue);
+      // this.passFieldContainer.addChildViewAt(activeFields.pass, 0);
+      btn.setTitle(defaultTitle);
+    }
+  };
+
+  createFields() {
+    this.fieldsContainer = gui.Container.create();
+    const pickType = gui.Picker.create();
+    const pickTypeField = gui.Container.create();
+    const pickTypeLabel = gui.Label.create('Tipo de entrada');
+    pickType.addItem(localize(LANG, 'Palavra-passe'));
+    pickType.addItem('Cartao');
+    pickTypeField.addChildView(pickTypeLabel);
+    pickTypeField.addChildView(pickType);
+    this.passFieldContainer = gui.Container.create();
+    const viewBtn = gui.Button.create(localize(LANG, 'Mostrar'));
+    const generateBtn = gui.Button.create(localize(LANG, 'Gerar'));
+    const passFieldEvents = {
+      textChange: () => {
+        if (passField.childAt(1).getText().length) {
+          // passphrase = fieldPass.getText();
+          // fieldPassView.setText(passphrase);
+        } else {
+          // passphrase = '';
+        }
+      },
+      activate: () => { }
+    };
+
+    const passFieldNormal = createField(localize(LANG, 'Palavra-passe'), 'normal', passFieldEvents);
+    const passField = createField(localize(LANG, 'Palavra-passe'), 'password', passFieldEvents);
+    const titleField = createField(localize(LANG, 'Título'), 'normal');
+    const siteField = createField('Site', 'normal');
+    const usernameField = createField(localize(LANG, 'Nome do usuário'), 'normal');
+    viewBtn.onClick  = this.onViewPassField.bind(this);
+    generateBtn.onClick = this.onGeneratePassField.bind(this);
+    this.passFieldContainer.addChildView(passField);
+    this.passFieldContainer.addChildView(viewBtn);
+    this.passFieldContainer.addChildView(generateBtn);
+    this.fieldsContainer.addChildView(pickTypeField);
+    this.fieldsContainer.addChildView(titleField);
+    this.fieldsContainer.addChildView(siteField);
+    this.fieldsContainer.addChildView(usernameField);
+    this.fieldsContainer.addChildView(this.passFieldContainer);
+    viewBtn.setStyle(STYLES.buttonDefaultMini);
+    generateBtn.setStyle(STYLES.buttonDefaultMini);
+    this.passFieldContainer.setStyle({ maxHeight: 56, flex: 1, flexDirection: 'row', alignItems: 'flex-end' });
+    this.fieldsContainer.setStyle({ width: '100%', paddingLeft: 16, paddingRight: 16, flex: 1, flexDirection: 'column' });
+
+    activeFields = Object.assign({
+      type: pickTypeField,
+      title: titleField,
+      site: siteField,
+      username: usernameField,
+      pass: passField,
+      passNormal: passFieldNormal,
+      view: viewBtn,
+      generate: generateBtn
+    }, activeFields);
+
+    function createField(title, type, on) {
+      const field = gui.Container.create();
+      const input = gui.Entry.createType(type);
+      const label = gui.Label.createWithAttributedText(gui.AttributedText.create(title, {
+        font: gui.Font.default().derive(-3, 'medium', 'normal'),
+        align: 'start'
+      }));
+      field.addChildView(label);
+      field.addChildView(input);
+      label.setStyle({ marginBottom: 4, color: COLORS.textDefault });
+      label.setAlign('start');
+      input.setStyle({ width: '100%' });
+      field.setStyle({ maxHeight: 56, flex: 1, flexDirection: 'column' });
+      if (on && Object.keys(on).length) {
+        if ('textChange' in on) {
+          input.onTextChange = on.textChange;
+        }
+        if ('activate' in on) {
+          input.onActivate = on.activate;
+        }
+      }
+      return field;
+    }
+  }
+}
+/**
 *  Creates entry list item view.
 */
-class EntriesListItem {
+class DatastoreEntriesListItem {
   constructor(title, item) {
     this.item = item;
     this.view = gui.Container.create();
@@ -692,14 +850,18 @@ class DatastoreEntriesListTab {
   constructor() {
     this.view = gui.Scroll.create();
     this.entries = gui.Container.create();
-    this.searchView = this.entriesSearchView();
-    this.entries.addChildView(this.searchView);
+    this.searchEntries = gui.Entry.create();
+    this.searchEntries.onActivate = this.onEntriesSearch.bind(this);
+    this.entries.addChildView(this.searchEntries);
+    ka.push(this.searchEntries);
+    entries = [];
     for (const entry of this.getEntries()) {
-      const entryItem = new EntriesListItem(entry.title, entry.uuid);
+      const entryItem = new DatastoreEntriesListItem(entry.title, entry.uuid);
       this.entries.addChildView(entryItem.view);
       entries.push(entryItem);
     }
     this.entries.addChildView(gui.Label.create(`${entries.length} ${localize(LANG, 'Entradas')}`));
+    this.searchEntries.setStyle({ marginTop: 16, marginBottom: 16 });
     this.entries.setStyle({ paddingLeft: 4, paddingRight: 4, flex: 1, flexDirection: 'column' });
     this.view.setContentSize(this.entries.getPreferredSize());
     this.view.setScrollbarPolicy('never', 'automatic');
@@ -708,7 +870,7 @@ class DatastoreEntriesListTab {
   }
 
   onEntriesSearch() {
-
+    console.log(this.searchEntries.getText());
   }
 
   getEntries() {
@@ -717,146 +879,13 @@ class DatastoreEntriesListTab {
     // }
     return entriesData;
   }
-
-  entriesSearchView() {
-    const container = gui.Container.create();
-    const search = gui.Entry.create();
-    search.onActivate = this.onEntriesSearch.bind(this);
-    container.addChildView(search);
-    container.setStyle({ marginTop: 16, marginBottom: 16 });
-    return container;
-  }
 }
-
 /**
-*  Creates activities page in datastore activity tab.
-*/
-// function createDatastoreActivity() {
-//   const container = gui.Container.create();
-//   return container;
-// }
-
-/**
-*  Creates datastore tabs entry add tab view.
+*  Creates datastore tabs, entry add tab view.
 */
 class DatastoreEntriesAddTab {
   constructor() {
-    // const uuid, title, username, email, notes, password, createTime, modifyTime, url, autotype:bool
-    this.createFields();
-    this.view = gui.Container.create();
-    const heading = gui.Label.createWithAttributedText(gui.AttributedText.create(localize(LANG, 'Adicionar uma nova entrada'), {
-      font: gui.Font.default().derive(0, 'extra-bold', 'normal'),
-      align: 'center',
-      valign: 'center',
-      color: gui.Color.rgb(67,67,67)
-    }));
-    this.submitBtn = gui.Button.create(localize(LANG, 'Guardar...'));
-    this.submitBtn.onClick = this.onSubmitEntry.bind(this);
-    this.view.addChildView(heading);
-    this.view.addChildView(this.fieldsContainer);
-    this.view.addChildView(this.submitBtn);
-    heading.setStyle(STYLES.headers);
-    this.submitBtn.setStyle(STYLES.buttonDefaultBig);
-    this.view.setStyle({ flex: 1, flexDirection: 'column', alignItems: 'center' });
-  }
-
-  onSubmitEntry() {
-    // console.log(activeFields);
-    // console.log(this.fields.titleField.getEntry().getText());
-    // console.log(this.fields.usernameField.getEntry().getText());
-    // console.log(this.fields.passField.getEntry().getText());
-  }
-
-  onGeneratePassField(btn) {
-    datastore.generatePassphrase().then(gen => {
-      this.passFieldContainer.childAt(0).childAt(1).setText(gen);
-    });
-  }
-
-  onViewPassField(btn) {
-    const defaultTitle = localize(LANG, 'Mostrar'),
-    currentValue = this.passFieldContainer.childAt(0).childAt(1).getText();
-    if (btn.getTitle() == defaultTitle) {
-      this.passFieldContainer.removeChildView(this.passFieldContainer.childAt(0));
-      this.passFieldContainer.addChildViewAt(activeFields.passFieldNormal, 0);
-      btn.setTitle('Cacher');
-    } else {
-      this.passFieldContainer.removeChildView(this.passFieldContainer.childAt(0));
-      this.passFieldContainer.addChildViewAt(activeFields.passField, 0);
-      btn.setTitle(defaultTitle);
-    }
-    this.passFieldContainer.childAt(0).childAt(1).setText(currentValue);
-  };
-
-  createFields() {
-    this.fieldsContainer = gui.Container.create();
-    this.passFieldContainer = gui.Container.create();
-    const viewBtn = gui.Button.create(localize(LANG, 'Mostrar'));
-    const generateBtn = gui.Button.create(localize(LANG, 'Gerar'));
-    const passFieldEvents = {
-      textChange: () => {
-        if (passField.childAt(1).getText().length) {
-          // passphrase = fieldPass.getText();
-          // fieldPassView.setText(passphrase);
-        } else {
-          // passphrase = '';
-        }
-      },
-      activate: () => { }
-    };
-
-    const passFieldNormal = createField(localize(LANG, 'Palavra-passe'), 'normal', passFieldEvents);
-    const passField = createField(localize(LANG, 'Palavra-passe'), 'password', passFieldEvents);
-    const titleField = createField(localize(LANG, 'Título'), 'normal');
-    const siteField = createField('Site', 'normal');
-    const usernameField = createField(localize(LANG, 'Nome do usuário'), 'normal');
-    viewBtn.onClick  = this.onViewPassField.bind(this);
-    generateBtn.onClick = this.onGeneratePassField.bind(this);
-    this.passFieldContainer.addChildView(passField);
-    this.passFieldContainer.addChildView(viewBtn);
-    this.passFieldContainer.addChildView(generateBtn);
-    this.fieldsContainer.addChildView(titleField);
-    this.fieldsContainer.addChildView(siteField);
-    this.fieldsContainer.addChildView(usernameField);
-    this.fieldsContainer.addChildView(this.passFieldContainer);
-    viewBtn.setStyle(STYLES.buttonDefaultMini);
-    generateBtn.setStyle(STYLES.buttonDefaultMini);
-    this.passFieldContainer.setStyle({ maxHeight: 56, flex: 1, flexDirection: 'row', alignItems: 'flex-end' });
-    this.fieldsContainer.setStyle({ width: '100%', paddingLeft: 16, paddingRight: 16, flex: 1, flexDirection: 'column' });
-
-    activeFields = Object.assign({
-      // title: titleField,
-      // site: siteField,
-      // username: usernameField,
-      passField: passField,
-      passFieldNormal: passFieldNormal,
-      view: viewBtn,
-      generate: generateBtn
-    }, activeFields);
-
-    function createField(title, type, on) {
-      const field = gui.Container.create();
-      const input = gui.Entry.createType(type);
-      const label = gui.Label.createWithAttributedText(gui.AttributedText.create(title, {
-        font: gui.Font.default().derive(-3, 'medium', 'normal'),
-        align: 'start'
-      }));
-      field.addChildView(label);
-      field.addChildView(input);
-      label.setStyle({ marginBottom: 4, color: COLORS.textDefault });
-      label.setAlign('start');
-      input.setStyle({ width: '100%' });
-      field.setStyle({ maxHeight: 56, flex: 1, flexDirection: 'column' });
-      if (on && Object.keys(on).length) {
-        if ('textChange' in on) {
-          input.onTextChange = on.textChange;
-        }
-        if ('activate' in on) {
-          input.onActivate = on.activate;
-        }
-      }
-      return field;
-    }
+    this.view = new DatastoreEntryResource().view;
   }
 }
 /**
@@ -875,87 +904,8 @@ class DatastoreTabs {
 *  Creates datastore entry edit view.
 */
 class DatastoreEntryEdit {
-  constructor() {
-    // const uuid, title, username, email, notes, password, createTime, modifyTime, url, autotype:bool
-    this.view = appearanceBasedContainer();
-    const heading = gui.Label.createWithAttributedText(gui.AttributedText.create(localize(LANG, 'Adicionar uma nova entrada'), {
-      font: gui.Font.default().derive(0, 'extra-bold', 'normal'),
-      align: 'center',
-      valign: 'center',
-      color: gui.Color.rgb(67,67,67)
-    }));
-    const submit = gui.Button.create(localize(LANG, 'Guardar...'));
-    const goBackBtn = gui.Button.create('Regressar');
-    const goBackBtnIcon = gui.Image.createFromPath(path.join(__dirname, 'assets', 'back.png'));
-    goBackBtn.setImage(goBackBtnIcon);
-    this.view.addChildView(heading);
-    this.view.addChildView(this.createFields());
-    this.view.addChildView(goBackBtn);
-    this.view.addChildView(submit);
-    heading.setStyle(STYLES.headers);
-    submit.setStyle(STYLES.buttonDefaultBig);
-    this.view.setStyle({ flex: 1, flexDirection: 'column', alignItems: 'center' });
-  }
-
-  createFields() {
-    const fields = gui.Container.create();
-    const passFieldContainer = gui.Container.create();
-    const viewBtn = gui.Button.create(localize(LANG, 'Mostrar'));
-    const generateBtn = gui.Button.create(localize(LANG, 'Gerar'));
-    viewBtn.onClick = (btn) => {};
-    generateBtn.onClick = (btn) => {};
-    const passField = createField(localize(LANG, 'Palavra-passe'), 'password', {
-      textChange: () => {
-        if (passField.getText().length) {
-          // passphrase = fieldPass.getText();
-          // fieldPassView.setText(passphrase);
-        } else {
-          // passphrase = '';
-        }
-      },
-      activate: () => { }
-    });
-
-    const titleField = createField(localize(LANG, 'Título'), 'normal');
-    const siteField = createField('Site', 'normal');
-    const usernameField = createField(localize(LANG, 'Nome do usuário'), 'normal');
-    passFieldContainer.addChildView(passField);
-    passFieldContainer.addChildView(viewBtn);
-    passFieldContainer.addChildView(generateBtn);
-    fields.addChildView(titleField);
-    fields.addChildView(siteField);
-    fields.addChildView(usernameField);
-    fields.addChildView(passFieldContainer);
-    viewBtn.setStyle(STYLES.buttonDefaultMini);
-    generateBtn.setStyle(STYLES.buttonDefaultMini);
-    passFieldContainer.setStyle({ maxHeight: 56, flex: 1, flexDirection: 'row', alignItems: 'flex-end' });
-    fields.setStyle({ width: '100%', paddingLeft: 16, paddingRight: 16, flex: 1, flexDirection: 'column' });
-
-    function createField(title, type, on) {
-      const field = gui.Container.create();
-      const label = gui.Label.createWithAttributedText(gui.AttributedText.create(title, {
-        font: gui.Font.default().derive(-3, 'medium', 'normal'),
-        align: 'start'
-      }));
-      const input = gui.Entry.createType(type);
-      if (on && Object.keys(on).length) {
-        if ('textChange' in on) {
-          input.onTextChange = on.textChange;
-        }
-        if ('activate' in on) {
-          input.onActivate = on.activate;
-        }
-      }
-      field.getText = () => input.getText();
-      field.addChildView(label);
-      field.addChildView(input);
-      label.setStyle({ marginBottom: 4, color: COLORS.textDefault });
-      label.setAlign('start');
-      input.setStyle({ width: '100%' });
-      field.setStyle({ maxHeight: 56, flex: 1, flexDirection: 'column' });
-      return field;
-    }
-    return fields;
+  constructor(entry) {
+    this.view = new DatastoreEntryResource(entry).view;
   }
 }
 /**
@@ -984,7 +934,7 @@ class DatastoreEntryShow {
       setContentView(new DatastoreView().view);
     }
     editBtn.onClick = () => {
-      setContentView(new DatastoreEntryEdit().view);
+      setContentView(new DatastoreEntryEdit(entry).view);
     }
     this.view.addChildView(heading);
     Object.getOwnPropertyNames(entry).forEach((key, i) => {
@@ -1013,8 +963,8 @@ class DatastoreEntryShow {
     goBackBtn.setStyle(Object.assign({}, STYLES.buttonDefaultIcon, {marginBottom: 8}));
     editBtn.setStyle(Object.assign({}, STYLES.buttonDefaultMini, {marginBottom: 8}));
     removeBtn.setStyle(Object.assign({}, STYLES.buttonDefaultMini, {marginBottom: 8}));
-    entryActionsContainer.setStyle({paddingBottom: 24, flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end'});
-    this.view.setStyle({flex: 1, flexDirection: 'column', justifyContent: 'flex-start'});
+    entryActionsContainer.setStyle({ flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end'});
+    this.view.setStyle({paddingBottom: 24, flex: 1, flexDirection: 'column', justifyContent: 'flex-start'});
     // this.view.setBackgroundColor(COLORS.background);
   }
 }

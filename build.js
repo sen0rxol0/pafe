@@ -5,6 +5,8 @@
 
 const { exec } = require('child_process');
 const VERSION = require('./package.json').version;
+// TODO
+// download or build gui for each platform 
 
 function execCmd(cmd) {
   return new Promise((resolve, reject) => {
@@ -34,8 +36,6 @@ execCmd('npx gulp pack:linux').then(() => {
     console.log('build for linux platform is complete.\n');
   }).catch(onExecCatch);
 }).catch(onExecCatch);
-
-
 
 // execCmd('npx gulp pack:win').then(() => {
 //   execCmd(`zip -rq pafe-v${VERSION}-win.zip ./build/Pafe-darwin-x64/Pafe.app && rm -r build`)
