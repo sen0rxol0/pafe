@@ -1,16 +1,23 @@
 ![pafe banner](https://github.com/sen0rxol0/pafe/blob/main/src/assets/banner_1024x256@1x.png)
 # PAFE - PRIVATE SAFE
 PAFE is a [descentralized](https://en.wikipedia.org/wiki/Decentralized_web) password management application.
-It might be of use for, anything that needs password protection and or encryption.
+<!-- It might be of use for other things in your computer that needs password protection and or encryption. -->
 
-<!-- ## Predictions -->
+<!-- ## Features -->
+<!-- password management -->
+<!-- browser addon for automatic login auto-complete -->
+
+<!-- ## Roadmap -->
 <!-- 1. Add support for file encryption -->
 ## Availability
-Cross-platform on the desktop, not available on mobile as of yet but eventually Pafe will be made available on the mobile. 
+Cross-platform on the desktop, not available on mobile as of yet but eventually Pafe will be made available on the mobile platforms.
+Current support:
 
 - Windows
 - macOS
 - Linux
+
+<!-- ## Next -->
 
 ## About encryption
     PAFE encrypts using AES-256-GCM encryption algorithm, with a master key,
@@ -18,7 +25,7 @@ Cross-platform on the desktop, not available on mobile as of yet but eventually 
 <details>
 <br/>
 AES-256-GCM (Advanced Encryption Standard in Galois/Counter Mode)<br/>
-Meaning the data is encrypted with a 256 bit key, generated for encryption using AES in GCM mode.
+Meaning the data is encrypted with a 256-bit key, generated for encryption using AES in GCM mode.
 <br/><br/>
 <a href="https://fr.wikipedia.org/wiki/PBKDF2">PBKDF2 (Password-Based Key Derivation Function 2)</a>
 <br/><br/>

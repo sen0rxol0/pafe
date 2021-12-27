@@ -50,7 +50,6 @@ async function decrypt(cipherdata, key) {
     params = { name: ALGO, iv, tagLength: TAG_LEN },
     plainBuffer = await crypto.subtle.decrypt(params, key, cipherBuffer),
     plaindata = Uint8ArrayToStr(plainBuffer);
-
   return plaindata;
 }
 
