@@ -3,9 +3,10 @@
 *PAFE* is a [descentralized](https://en.wikipedia.org/wiki/Decentralized_web) **password management** application.
 <!-- It might be of use for other things in your computer that needs password protection and or encryption. -->
 
-<!-- ## Features -->
-<!-- password management -->
-<!-- browser addon for automatic login auto-complete -->
+## Features
+- Password management
+- Browser addon for automatic login credentials auto-complete
+- CSV imports
 
 <!-- ## Roadmap -->
 <!-- 1. Add support for file encryption -->
@@ -38,5 +39,5 @@ Meaning the data is encrypted with a 256-bit key, generated for encryption using
 
 ## About license
 - **[MIT](https://github.com/sen0rxol0/pafe/blob/main/LICENCE)**
-    - [ElectronJS](https://github.com/electron/electron) is licenced under [MIT](https://github.com/electron/electron/blob/master/LICENSE)
-    - [Yue](https://github.com/yue/yue) is licenced under [LGPL v2.1](https://github.com/yue/yue/blob/master/LICENSE)
+    - [ElectronJS](https://github.com/electron/electron) is licenced under the [MIT](https://github.com/electron/electron/blob/master/LICENSE)
+    - [Yue](https://github.com/yue/yue) is licenced under the [LGPL v2.1](https://github.com/yue/yue/blob/master/LICENSE)
