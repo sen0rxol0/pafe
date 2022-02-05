@@ -3,11 +3,11 @@
 * Author: @sen0rxol0
 * Description: Gestionnaire d'encryptage.
 *
-* Copyright © 2021 BAIEFLOW
+* Copyright © 2022 @sen0rxol0
 */
 
 /**
-* CHANGELOGS: 22/05/2021
+* CHANGELOGS: 27/12/2021
 */
 
 const path = require('path');
@@ -1283,24 +1283,6 @@ function main() {
 
 main();
 
-/**
-*** TODOS
-* ==================
-*  Credentials
-*    Say YOURCompany has all sorts of passwords and informations that are often shared
-*     between members of YOURCompany, credentials allows sharing those passwords
-*     and informations as a single syncronized stack of information.
-*
-*    A credential record is keeped and shared as:
-*      CompanyName:
-*        Records:
-*          - hostname1,login1,password1,note1
-*          - hostname2,login2,password2,note2
-*
-*   Keeping track of logins, passwords, addresses, documents, etc, is still hard so
-*   Pafe Credentials helps you keeping track and sharing with ease and safety.
-* ==================
-*/
 // function createCredentialsView() {
 //   const container = gui.Container.create();
 //   const sidebar = createSidebar();
