@@ -1,12 +1,16 @@
 ![pafe github banner](https://github.com/sen0rxol0/pafe/blob/main/src/assets/banner_1024x256@1x.png)
+<small>under development, early beta v0.10.3</small>
 # PAFE - PRIVATE SAFE
-*PAFE* is a [descentralized](https://en.wikipedia.org/wiki/Decentralized_web) **password management** application.
+*PAFE* is a **password management** application.
+<!-- [descentralized](https://en.wikipedia.org/wiki/Decentralized_web) -->
 <!-- It might be of use for other things in your computer that needs password protection and or encryption. -->
 
 ## Features
+- AES encryption
 - Password management
 - Browser addon for automatic login credentials auto-complete
-- CSV imports
+- CSV file imports
+- Cross-platform
 
 <!-- ## Roadmap -->
 <!-- 1. Add support for file encryption -->
