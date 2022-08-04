@@ -4,7 +4,7 @@
 # PAFE - PRIVATE SAFE
 *PAFE* is a **password management** application.
 
-*TRY PAFE NOW:* [pafe.live](https://pafe.live)
+*TRY NOW*: [pafe.live](https://pafe.live)
 
 ## Features
 - AES encryption
