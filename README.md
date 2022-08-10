@@ -1,8 +1,10 @@
 <!-- ![pafe github banner](https://github.com/sen0rxol0/pafe/blob/main/src/assets/banner_1024x256@1x.png) -->
-<small>under development, early beta v0.10.3. WARNING: this repo is imcomplete.</small>
+<small>under development, early beta v0.10.3.
+WARNING: This repo is imcomplete !</small>
 
 # PAFE - PRIVATE SAFE
 PAFE is a **password management** application.
+
 TRY OUT: [pafe.live](https://pafe.live)
 
 ## Features
