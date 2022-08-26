@@ -16,9 +16,9 @@
     "nodemon": "^2.0.15"
   },
   "build": {
-    "appId": "com.baieflow.pafe",
+    "appId": "dev.sen0rxol0.pafe",
     "productName": "Pafe",
-    "copyright": "Copyright © 2021 BAIEFLOW",
+    "copyright": "Copyright © 2021 @sen0rxol0",
     "iconPath": "src/assets/icon.png"
   },
   "scripts": {
