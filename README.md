@@ -3,7 +3,7 @@
 # PAFE - PRIVATE SAFE
 PAFE is a **password management** application.
 
-TRY OUT: [pafe.live](https://pafe.live)
+Try out: [pafe.live](https://pafe.live)
 
 ## Features
 - AES encryption
