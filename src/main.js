@@ -3,7 +3,7 @@
 * Author: @sen0rxol0
 * Description: Gestionnaire d'encryptage.
 *
-* Copyright © 2022 @sen0rxol0
+* Copyright © 2021 @sen0rxol0
 */
 
 /**
