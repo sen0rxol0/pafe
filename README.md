@@ -1,9 +1,6 @@
-<small>WARNING: This repo is imcomplete !</small>
+<small>WARNING: This repo is experimental !</small>
 
-# PAFE - PRIVATE SAFE
-PAFE is a **password management** application.
-
-Try out: [pafe.live](https://pafe.live)
+> PAFE is a **password management** application.
 
 ## Features
 - AES encryption
@@ -14,17 +11,9 @@ Try out: [pafe.live](https://pafe.live)
 
 <!-- ## Roadmap -->
 <!-- 1. Add support for file encryption -->
+
 ## Availability
 Cross-platform on the desktop, not available on mobile as of yet but eventually Pafe will be made available on the mobile platforms.
-
-Current support:
-
-- Windows
-    - *BETA* version: soon available for download
-- macOS
-    - *BETA* version: soon available for download
-- Linux
-    - *BETA* version: soon available for download
 
 *PS: Install __NodeJS__, then clone this repo, type `npm install` in your terminal at the root directory, wait for node_modules to finish installing, type `npm run start` to launch the application*
 <!-- ## Next -->
